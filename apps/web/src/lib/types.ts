@@ -84,6 +84,26 @@ export type TodayStatus = {
 
 export type Comment = { id: number; author: Author; content: string; mine: boolean; createdAt: string }
 
+export type MemberStats = {
+  userId: number
+  nickname: string
+  currentStreak: number
+  totalCertifications: number
+  missedCount: number
+  totalPenaltyPoints: number
+}
+
+export type CrewStats = { me: MemberStats; members: MemberStats[] }
+
+export type Settlement = {
+  date: string
+  targetCount: number
+  certifiedCount: number
+  penalties: { userId: number; nickname: string; points: number }[]
+}
+
+export type SettlementHistory = { items: Settlement[]; nextBefore: string | null }
+
 export type TokenResponse = {
   accessToken: string
   expiresIn: number

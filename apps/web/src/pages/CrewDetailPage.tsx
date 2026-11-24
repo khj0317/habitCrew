@@ -3,6 +3,7 @@ import { CalendarDays, Check, Coins, Copy, Crown, LogOut, MoreVertical, Pencil, 
 import { useEffect, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { FeedSection } from '../components/FeedSection'
+import { MyStatsCard } from '../components/MyStatsCard'
 import { TodayCard } from '../components/TodayCard'
 import { Button, ConfirmDialog, ErrorState, PageHeader } from '../components/ui'
 import { ApiError } from '../lib/api'
@@ -92,6 +93,8 @@ export function CrewDetailPage() {
         </section>
 
         <TodayCard crewId={crew.id} />
+
+        <MyStatsCard crewId={crew.id} />
 
         <InviteCard crew={crew} onRegenerate={() => setPending({ kind: 'regenerate' })} />
 

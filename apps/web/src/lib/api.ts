@@ -30,15 +30,22 @@ export function setSessionExpiredHandler(handler: () => void) {
   onSessionExpired = handler
 }
 
-/** 쿠키의 리프레시 토큰으로 새 토큰을 받는다. 로그인 상태가 아니면 null */
+async function requestRefresh(): Promise<TokenResponse | null> {
+  const res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' })
+  if (!res.ok) return null
+  const body = (await res.json()) as TokenResponse
+  accessToken = body.accessToken
+  return body
+}
+
+/**
+ * 쿠키의 리프레시 토큰으로 새 토큰을 받는다. 로그인 상태가 아니면 null.
+ * - 같은 탭에서 여러 요청이 동시에 부르면 한 번만 보낸다 (Promise 공유)
+ * - 다른 탭과 동시에 보내 한쪽이 실패하면, 다른 탭이 받은 새 쿠키로 한 번 더 시도한다
+ */
 export function refreshSession(): Promise<TokenResponse | null> {
-  refreshing ??= fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' })
-    .then(async (res) => {
-      if (!res.ok) return null
-      const body = (await res.json()) as TokenResponse
-      accessToken = body.accessToken
-      return body
-    })
+  refreshing ??= requestRefresh()
+    .then((first) => first ?? new Promise<void>((r) => setTimeout(r, 300)).then(requestRefresh))
     .catch(() => null)
     .finally(() => {
       refreshing = null

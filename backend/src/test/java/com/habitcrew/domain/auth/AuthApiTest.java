@@ -93,9 +93,34 @@ class AuthApiTest {
         Cookie second = refreshed.getResponse().getCookie(RefreshTokenCookie.NAME);
         assertThat(second.getValue()).isNotEqualTo(first.getValue());
 
-        mockMvc.perform(post("/api/auth/refresh").cookie(first))
+        MvcResult reused = mockMvc.perform(post("/api/auth/refresh").cookie(first))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("INVALID_REFRESH_TOKEN"));
+                .andExpect(jsonPath("$.code").value("INVALID_REFRESH_TOKEN"))
+                .andReturn();
+        // 실패해도 쿠키를 지우지 않는다: 탭 두 개가 동시에 재발급할 때 이긴 탭의 새 쿠키를 지우지 않기 위해
+        assertThat(reused.getResponse().getHeader("Set-Cookie")).isNull();
+    }
+
+    @Test
+    @DisplayName("탭 두 개가 같은 토큰으로 동시에 재발급하면 한쪽만 성공하고, 이긴 쪽의 새 토큰은 계속 쓸 수 있다")
+    void concurrentRefreshFromTwoTabs() throws Exception {
+        Cookie shared = signup(uniqueEmail(), "Password1", uniqueNickname()).andReturn()
+                .getResponse().getCookie(RefreshTokenCookie.NAME);
+
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        var tabs = java.util.List.of(
+                executor.submit(() -> mockMvc.perform(post("/api/auth/refresh").cookie(shared)).andReturn()),
+                executor.submit(() -> mockMvc.perform(post("/api/auth/refresh").cookie(shared)).andReturn()));
+        java.util.List<MvcResult> results = new java.util.ArrayList<>();
+        for (var tab : tabs) {
+            results.add(tab.get());
+        }
+        executor.shutdown();
+
+        MvcResult winner = results.stream().filter(r -> r.getResponse().getStatus() == 200).findFirst().orElseThrow();
+        assertThat(results).filteredOn(r -> r.getResponse().getStatus() == 401).hasSize(1);
+        mockMvc.perform(post("/api/auth/refresh").cookie(winner.getResponse().getCookie(RefreshTokenCookie.NAME)))
+                .andExpect(status().isOk());
     }
 
     @Test

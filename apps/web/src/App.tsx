@@ -8,6 +8,7 @@ import { CreateCrewPage, EditCrewPage } from './pages/CrewFormPages'
 import { CrewDetailPage } from './pages/CrewDetailPage'
 import { HomePage } from './pages/HomePage'
 import { JoinCrewPage } from './pages/JoinCrewPage'
+import { SettlementsPage } from './pages/SettlementsPage'
 import { useAuth } from './providers/authContext'
 import { useRedirectTarget } from './lib/redirect'
 
@@ -43,6 +44,7 @@ export function App() {
       <Route path="/crews/:crewId" element={authed(<CrewDetailPage />)} />
       <Route path="/crews/:crewId/edit" element={authed(<EditCrewPage />)} />
       <Route path="/crews/:crewId/certify" element={authed(<CertifyPage />)} />
+      <Route path="/crews/:crewId/settlements" element={authed(<SettlementsPage />)} />
       <Route path="/crews/:crewId/certifications/:certificationId" element={authed(<CertificationPage />)} />
       <Route path="/join" element={authed(<JoinCrewPage />)} />
       <Route path="/join/:code" element={authed(<JoinCrewPage />)} />

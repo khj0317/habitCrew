@@ -61,6 +61,12 @@ habitcrew:
     url-ttl: 1h
     # 서버가 뜰 때 버킷이 없으면 만든다 (로컬 전용, 배포에서는 미리 만들어 둔 버킷을 쓴다)
     create-bucket: ${STORAGE_CREATE_BUCKET:true}
+  # 자정 정산: 매일 00:05(KST)에 어제 인증하지 않은 크루원에게 벌금을 매긴다
+  settlement:
+    enabled: ${SETTLEMENT_ENABLED:true}
+    cron: "0 5 0 * * *"
+    # 서버가 꺼져 있어 놓친 정산을 며칠 전까지 거슬러 올라가 따라잡을지
+    catch-up-days: 7
   # 로그인 실패 제한: 같은 이메일로 5번 틀리면 10분 잠금
   login-limit:
     max-attempts: 5

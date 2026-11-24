@@ -39,12 +39,9 @@ public class AuthController {
     public TokenResponse refresh(HttpServletRequest request, HttpServletResponse response) {
         String token = refreshTokenCookie.read(request)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
-        try {
-            return respond(authService.refresh(token), response);
-        } catch (BusinessException e) {
-            refreshTokenCookie.clear(response); // 쓸 수 없는 쿠키는 지워서 매번 재시도하지 않게 한다
-            throw e;
-        }
+        // 실패해도 쿠키를 지우지 않는다. 탭 두 개가 같은 토큰으로 동시에 재발급하면 한쪽은 실패하는데,
+        // 그때 쿠키를 지우면 다른 탭이 방금 받은 새 쿠키까지 지워져 둘 다 로그아웃된다.
+        return respond(authService.refresh(token), response);
     }
 
     @PostMapping("/logout")
