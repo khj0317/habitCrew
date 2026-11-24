@@ -23,6 +23,15 @@ public abstract class ApiTestSupport {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected MutableClock clock;
+
+    /** 시계를 옮긴 테스트가 다른 테스트에 영향을 주지 않게 되돌린다 */
+    @org.junit.jupiter.api.AfterEach
+    void resetClock() {
+        clock.reset();
+    }
+
     protected record TestUser(Long id, String nickname, String token) {
         public String bearer() {
             return "Bearer " + token;

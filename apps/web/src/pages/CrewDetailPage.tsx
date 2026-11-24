@@ -2,6 +2,8 @@ import clsx from 'clsx'
 import { CalendarDays, Check, Coins, Copy, Crown, LogOut, MoreVertical, Pencil, RefreshCw, Share2, Users } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
+import { FeedSection } from '../components/FeedSection'
+import { TodayCard } from '../components/TodayCard'
 import { Button, ConfirmDialog, ErrorState, PageHeader } from '../components/ui'
 import { ApiError } from '../lib/api'
 import { useCrew, useKickMember, useLeaveCrew, useRegenerateInviteCode, useTransferOwner } from '../lib/crews'
@@ -21,7 +23,7 @@ export function CrewDetailPage() {
   const location = useLocation()
   const { data: crew, isPending, isError, error } = useCrew(id)
   const [pending, setPending] = useState<Pending | null>(null)
-  const welcome = (location.state as { created?: boolean; joined?: boolean } | null) ?? {}
+  const welcome = (location.state as { created?: boolean; joined?: boolean; certified?: boolean } | null) ?? {}
 
   if (isPending) {
     return (
@@ -71,6 +73,11 @@ export function CrewDetailPage() {
             {welcome.created ? '🎉 크루를 만들었어요! 아래 초대 코드를 친구에게 보내 보세요.' : '🎉 크루에 참여했어요!'}
           </div>
         )}
+        {welcome.certified && (
+          <div className="rounded-2xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700" role="status">
+            ✅ 인증을 올렸어요! 크루원들의 응원을 기다려 보세요.
+          </div>
+        )}
 
         <section>
           <h1 className="text-2xl font-bold leading-snug">{crew.name}</h1>
@@ -83,6 +90,8 @@ export function CrewDetailPage() {
             </InfoChip>
           </div>
         </section>
+
+        <TodayCard crewId={crew.id} />
 
         <InviteCard crew={crew} onRegenerate={() => setPending({ kind: 'regenerate' })} />
 
@@ -103,8 +112,8 @@ export function CrewDetailPage() {
           </ul>
         </section>
 
-        <div className="rounded-2xl bg-stone-100 px-4 py-4 text-center text-sm text-stone-500">
-          📸 인증 피드는 다음 단계에서 열려요
+        <div className="mt-2">
+          <FeedSection crewId={crew.id} />
         </div>
 
         <button

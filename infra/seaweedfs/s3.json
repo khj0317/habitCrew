@@ -1,0 +1,11 @@
+{
+  "identities": [
+    {
+      "name": "habitcrew-local",
+      "credentials": [
+        { "accessKey": "habitcrew", "secretKey": "habitcrew-local-secret" }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

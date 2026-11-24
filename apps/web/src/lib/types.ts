@@ -52,6 +52,38 @@ export type InvitePreview = {
   alreadyJoined: boolean
 }
 
+export type Author = { userId: number; nickname: string }
+
+export type Certification = {
+  id: number
+  author: Author
+  certDate: string
+  message: string | null
+  imageUrl: string
+  thumbnailUrl: string
+  imageWidth: number
+  imageHeight: number
+  likeCount: number
+  likedByMe: boolean
+  commentCount: number
+  mine: boolean
+  createdAt: string
+}
+
+export type Feed = { items: Certification[]; nextCursor: number | null }
+
+export type TodayStatus = {
+  date: string
+  certDay: boolean
+  deadline: string
+  myCertificationId: number | null
+  certifiedCount: number
+  memberCount: number
+  members: { userId: number; nickname: string; certified: boolean; certificationId: number | null }[]
+}
+
+export type Comment = { id: number; author: Author; content: string; mine: boolean; createdAt: string }
+
 export type TokenResponse = {
   accessToken: string
   expiresIn: number

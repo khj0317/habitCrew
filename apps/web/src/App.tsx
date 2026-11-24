@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router'
 import { FullScreenSpinner } from './components/ui'
 import { LoginPage, SignupPage } from './pages/AuthPages'
+import { CertificationPage } from './pages/CertificationPage'
+import { CertifyPage } from './pages/CertifyPage'
 import { CreateCrewPage, EditCrewPage } from './pages/CrewFormPages'
 import { CrewDetailPage } from './pages/CrewDetailPage'
 import { HomePage } from './pages/HomePage'
@@ -40,6 +42,8 @@ export function App() {
       <Route path="/crews/new" element={authed(<CreateCrewPage />)} />
       <Route path="/crews/:crewId" element={authed(<CrewDetailPage />)} />
       <Route path="/crews/:crewId/edit" element={authed(<EditCrewPage />)} />
+      <Route path="/crews/:crewId/certify" element={authed(<CertifyPage />)} />
+      <Route path="/crews/:crewId/certifications/:certificationId" element={authed(<CertificationPage />)} />
       <Route path="/join" element={authed(<JoinCrewPage />)} />
       <Route path="/join/:code" element={authed(<JoinCrewPage />)} />
       <Route path="/login" element={guest(<LoginPage />)} />

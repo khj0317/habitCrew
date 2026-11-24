@@ -25,6 +25,12 @@ spring:
     redis:
       url: ${REDIS_URL:redis://localhost:6381}
 
+  # 인증 사진: 브라우저에서 줄여서 보내지만, 원본을 그대로 보내는 경우를 대비해 10MB까지 받는다
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
 server:
   port: ${PORT:8090}
 
@@ -44,6 +50,17 @@ habitcrew:
   auth:
     # 리프레시 토큰 쿠키의 Secure 속성. https가 아닌 로컬에서는 application-local.yml에서 false
     cookie-secure: ${AUTH_COOKIE_SECURE:true}
+  # 인증 사진 저장소 (S3 호환). 로컬은 docker-compose의 SeaweedFS
+  storage:
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:8333}
+    region: ${STORAGE_REGION:us-east-1}
+    bucket: ${STORAGE_BUCKET:habitcrew-photos}
+    access-key: ${STORAGE_ACCESS_KEY:habitcrew}
+    secret-key: ${STORAGE_SECRET_KEY:habitcrew-local-secret}
+    # 사진 주소(서명 URL)의 유효 시간. 지나면 피드를 다시 불러와 새 주소를 받는다
+    url-ttl: 1h
+    # 서버가 뜰 때 버킷이 없으면 만든다 (로컬 전용, 배포에서는 미리 만들어 둔 버킷을 쓴다)
+    create-bucket: ${STORAGE_CREATE_BUCKET:true}
   # 로그인 실패 제한: 같은 이메일로 5번 틀리면 10분 잠금
   login-limit:
     max-attempts: 5

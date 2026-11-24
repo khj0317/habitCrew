@@ -49,14 +49,16 @@ export function refreshSession(): Promise<TokenResponse | null> {
 type Options = { method?: string; body?: unknown; auth?: boolean }
 
 export async function api<T>(path: string, { method = 'GET', body, auth = true }: Options = {}): Promise<T> {
+  // 사진 업로드(FormData)는 브라우저가 boundary를 넣은 Content-Type을 직접 정하게 둔다
+  const isForm = body instanceof FormData
   const send = () => {
     const headers: Record<string, string> = {}
-    if (body !== undefined) headers['Content-Type'] = 'application/json'
+    if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`
     return fetch(path, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
       credentials: 'same-origin',
     })
   }

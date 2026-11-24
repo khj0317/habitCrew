@@ -1,5 +1,5 @@
 # 다른 프로젝트(fitmate 등)와 동시에 켜도 충돌하지 않도록 포트를 따로 쓴다.
-#   PostgreSQL 5434 / Redis 6381 / 백엔드 8090 / 웹 5180
+#   PostgreSQL 5434 / Redis 6381 / 사진 저장소 8333 / 백엔드 8090 / 웹 5180
 name: habitcrew
 
 services:
@@ -34,7 +34,24 @@ services:
       timeout: 3s
       retries: 10
 
-  # 인증 사진용 S3 호환 저장소는 3단계에서 추가한다
+  # 인증 사진 저장소 (S3 호환). 배포 시 AWS S3·Cloudflare R2 등으로 주소와 키만 바꾸면 된다.
+  # 접근 키를 설정해 두어, 서버가 발급한 서명 URL 없이는 사진을 볼 수 없다 (크루원만 보기)
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: habitcrew-seaweedfs
+    restart: unless-stopped
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=256 -volume.max=8
+    ports:
+      - "8333:8333"
+    volumes:
+      - seaweedfs-data:/data
+      - ./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
 volumes:
   postgres-data:
+  seaweedfs-data:

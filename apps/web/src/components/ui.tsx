@@ -248,6 +248,41 @@ export function ConfirmDialog({
   )
 }
 
+/** 닉네임 첫 글자 아바타 (사람마다 같은 색이 나오게 id로 색을 고른다) */
+const AVATAR_COLORS = [
+  'bg-brand-100 text-brand-700',
+  'bg-sky-100 text-sky-700',
+  'bg-violet-100 text-violet-700',
+  'bg-rose-100 text-rose-700',
+  'bg-amber-100 text-amber-700',
+  'bg-teal-100 text-teal-700',
+]
+
+export function Avatar({
+  userId,
+  nickname,
+  size = 'md',
+  dimmed,
+}: {
+  userId: number
+  nickname: string
+  size?: 'sm' | 'md'
+  dimmed?: boolean
+}) {
+  return (
+    <span
+      aria-hidden
+      className={clsx(
+        'flex shrink-0 items-center justify-center rounded-full font-bold',
+        size === 'sm' ? 'size-8 text-xs' : 'size-10 text-sm',
+        dimmed ? 'bg-stone-100 text-stone-400' : AVATAR_COLORS[userId % AVATAR_COLORS.length],
+      )}
+    >
+      {nickname.slice(0, 1)}
+    </span>
+  )
+}
+
 export function ErrorState({ message, action }: { message: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center px-6 py-20 text-center">

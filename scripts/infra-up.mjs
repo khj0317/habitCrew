@@ -1,4 +1,4 @@
-// DB(PostgreSQL), Redis 컨테이너를 켠다.
+// DB(PostgreSQL), Redis, 사진 저장소(SeaweedFS) 컨테이너를 켠다.
 // Docker Desktop이 꺼져 있으면 알아보기 어려운 에러 대신 한국어로 안내한다.
 import { spawnSync } from 'node:child_process'
 
@@ -8,7 +8,7 @@ if (docker.error || docker.status !== 0) {
   process.exit(1)
 }
 
-console.log('🐳 DB · Redis를 켜는 중...')
+console.log('🐳 DB · Redis · 사진 저장소(SeaweedFS)를 켜는 중...')
 const up = spawnSync('docker', ['compose', 'up', '-d', '--wait'], { stdio: 'inherit' })
 if (up.status !== 0) process.exit(up.status ?? 1)
 console.log('✅ 준비 완료\n')

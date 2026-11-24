@@ -33,6 +33,29 @@ export function formatInviteCode(code: string): string {
   return code.length === 8 ? `${code.slice(0, 4)}-${code.slice(4)}` : code
 }
 
+/** "방금 전", "5분 전", "3시간 전", "어제", "1월 7일" */
+export function formatRelative(iso: string, now = Date.now()): string {
+  const diff = Math.max(0, now - new Date(iso).getTime())
+  const minutes = Math.floor(diff / 60_000)
+  if (minutes < 1) return '방금 전'
+  if (minutes < 60) return `${minutes}분 전`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}시간 전`
+  if (hours < 48) return '어제'
+  return new Date(iso).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
+}
+
+/** 마감까지 남은 시간: "3시간 12분 남음" */
+export function formatRemaining(deadlineIso: string, now = Date.now()): string {
+  const diff = new Date(deadlineIso).getTime() - now
+  if (diff <= 0) return '마감됐어요'
+  const totalMinutes = Math.floor(diff / 60_000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (hours === 0) return `${minutes}분 남음`
+  return `${hours}시간 ${minutes}분 남음`
+}
+
 export function inviteLink(code: string): string {
   return `${window.location.origin}/join/${code}`
 }

@@ -25,8 +25,19 @@ public class GlobalExceptionHandler {
     private static final Map<String, ErrorCode> CONSTRAINT_ERRORS = Map.of(
             "users_email_key", ErrorCode.DUPLICATE_EMAIL,
             "users_nickname_key", ErrorCode.DUPLICATE_NICKNAME,
-            "crew_members_crew_user_key", ErrorCode.ALREADY_JOINED
+            "crew_members_crew_user_key", ErrorCode.ALREADY_JOINED,
+            "uq_certifications_daily", ErrorCode.ALREADY_CERTIFIED
     );
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleTooLarge(Exception e) {
+        return toResponse(ErrorCode.IMAGE_TOO_LARGE);
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> handleMissingPart(Exception e) {
+        return toResponse(ErrorCode.PHOTO_REQUIRED);
+    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException e) {

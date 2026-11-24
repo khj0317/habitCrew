@@ -37,7 +37,21 @@ public enum ErrorCode {
     OWNER_CANNOT_LEAVE(HttpStatus.CONFLICT, "크루장은 다른 크루원에게 크루장을 넘긴 뒤에 나갈 수 있어요."),
     CANNOT_TARGET_SELF(HttpStatus.BAD_REQUEST, "자기 자신에게는 할 수 없어요."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "크루원을 찾을 수 없어요."),
-    MAX_MEMBERS_BELOW_CURRENT(HttpStatus.BAD_REQUEST, "정원은 지금 인원보다 적게 줄일 수 없어요.");
+    MAX_MEMBERS_BELOW_CURRENT(HttpStatus.BAD_REQUEST, "정원은 지금 인원보다 적게 줄일 수 없어요."),
+
+    // 인증
+    PHOTO_REQUIRED(HttpStatus.BAD_REQUEST, "인증 사진을 올려 주세요."),
+    UNSUPPORTED_IMAGE(HttpStatus.BAD_REQUEST, "JPG 또는 PNG 사진만 올릴 수 있어요."),
+    IMAGE_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE, "사진이 너무 커요. 10MB 이하로 올려 주세요."),
+    IMAGE_DIMENSIONS_TOO_LARGE(HttpStatus.BAD_REQUEST, "사진 해상도가 너무 커요."),
+    IMAGE_TOO_SMALL(HttpStatus.BAD_REQUEST, "사진이 너무 작아요. 64픽셀 이상인 사진을 올려 주세요."),
+    NOT_CERT_DAY(HttpStatus.BAD_REQUEST, "오늘은 이 크루의 인증일이 아니에요."),
+    ALREADY_CERTIFIED(HttpStatus.CONFLICT, "오늘은 이미 인증했어요."),
+    CERTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "인증을 찾을 수 없어요."),
+    NOT_CERTIFICATION_AUTHOR(HttpStatus.FORBIDDEN, "내 인증만 지울 수 있어요."),
+    PAST_CERTIFICATION(HttpStatus.CONFLICT, "지난 날짜의 인증은 지울 수 없어요. 이미 정산에 반영됐어요."),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없어요."),
+    NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "내 댓글만 지울 수 있어요.");
 
     private final HttpStatus status;
     private final String message;
