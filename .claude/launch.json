@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "habitcrew-web",
+      "runtimeExecutable": "npm.cmd",
+      "runtimeArgs": ["run", "dev:web"],
+      "port": 5180
+    },
+    {
+      "name": "habitcrew-api",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/gradle.mjs", "bootRun"],
+      "port": 8090
+    }
+  ]
+}

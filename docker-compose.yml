@@ -1,0 +1,40 @@
+# 다른 프로젝트(fitmate 등)와 동시에 켜도 충돌하지 않도록 포트를 따로 쓴다.
+#   PostgreSQL 5434 / Redis 6381 / 백엔드 8090 / 웹 5180
+name: habitcrew
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: habitcrew-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: habitcrew
+      POSTGRES_USER: habitcrew
+      POSTGRES_PASSWORD: habitcrew
+      TZ: Asia/Seoul
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habitcrew -d habitcrew"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: habitcrew-redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # 인증 사진용 S3 호환 저장소는 3단계에서 추가한다
+
+volumes:
+  postgres-data:
