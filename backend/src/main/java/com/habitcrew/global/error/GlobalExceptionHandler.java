@@ -24,7 +24,8 @@ public class GlobalExceptionHandler {
      */
     private static final Map<String, ErrorCode> CONSTRAINT_ERRORS = Map.of(
             "users_email_key", ErrorCode.DUPLICATE_EMAIL,
-            "users_nickname_key", ErrorCode.DUPLICATE_NICKNAME
+            "users_nickname_key", ErrorCode.DUPLICATE_NICKNAME,
+            "crew_members_crew_user_key", ErrorCode.ALREADY_JOINED
     );
 
     @ExceptionHandler(BusinessException.class)

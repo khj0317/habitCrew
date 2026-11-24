@@ -1,10 +1,14 @@
-import { LogOut, Plus, Ticket } from 'lucide-react'
-import { Button, Logo } from '../components/ui'
+import { CalendarDays, Crown, LogOut, Plus, Ticket, Users } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { Button, ErrorState, Logo } from '../components/ui'
+import { useMyCrews } from '../lib/crews'
+import { formatDays, formatPoints } from '../lib/format'
+import type { CrewSummary } from '../lib/types'
 import { useAuth } from '../providers/authContext'
 
-/** 1단계: 로그인 후 첫 화면. 그룹 기능은 2단계에서 채운다 */
 export function HomePage() {
   const { user, logout } = useAuth()
+  const { data: crews, isPending, isError, refetch } = useMyCrews()
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
@@ -25,27 +29,105 @@ export function HomePage() {
           <h1 className="text-2xl font-bold">{user?.nickname}님 🙌</h1>
         </section>
 
-        <section className="mt-8 flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-3xl">🌱</div>
-          <h2 className="mt-5 text-lg font-semibold">아직 참여한 크루가 없어요</h2>
-          <p className="mt-2 text-sm leading-relaxed text-stone-500">
-            크루를 직접 만들거나, 친구에게 받은
-            <br />
-            초대 코드로 참여해 보세요.
-          </p>
-          <div className="mt-8 flex w-full flex-col gap-2">
-            <Button disabled title="2단계에서 열려요">
-              <Plus className="size-4" aria-hidden />
-              크루 만들기
-            </Button>
-            <Button variant="ghost" disabled title="2단계에서 열려요">
-              <Ticket className="size-4" aria-hidden />
-              초대 코드로 참여
-            </Button>
+        {isPending ? (
+          <div className="mt-8 flex flex-col gap-3" aria-label="불러오는 중">
+            {[0, 1].map((i) => (
+              <div key={i} className="h-32 animate-pulse rounded-2xl bg-stone-200/60" />
+            ))}
           </div>
-          <p className="mt-4 text-xs text-stone-400">크루 기능은 다음 단계에서 열려요</p>
-        </section>
+        ) : isError ? (
+          <ErrorState
+            message="크루 목록을 불러오지 못했어요."
+            action={
+              <Button variant="secondary" onClick={() => refetch()}>
+                다시 시도
+              </Button>
+            }
+          />
+        ) : crews.length === 0 ? (
+          <EmptyCrews />
+        ) : (
+          <>
+            <div className="mt-8 mb-3 flex items-center justify-between">
+              <h2 className="font-semibold text-stone-700">
+                내 크루 <span className="text-brand-600">{crews.length}</span>
+              </h2>
+              <Link to="/join" className="text-sm font-medium text-stone-500 hover:text-stone-800">
+                초대 코드 입력
+              </Link>
+            </div>
+            <ul className="flex flex-col gap-3">
+              {crews.map((crew) => (
+                <li key={crew.id}>
+                  <CrewCard crew={crew} />
+                </li>
+              ))}
+            </ul>
+            <Link
+              to="/crews/new"
+              className="mt-3 flex h-14 items-center justify-center gap-1.5 rounded-2xl border border-dashed border-stone-300 text-sm font-medium text-stone-500 transition hover:border-brand-500 hover:text-brand-700"
+            >
+              <Plus className="size-4" aria-hidden />새 크루 만들기
+            </Link>
+          </>
+        )}
       </main>
     </div>
+  )
+}
+
+function CrewCard({ crew }: { crew: CrewSummary }) {
+  return (
+    <Link
+      to={`/crews/${crew.id}`}
+      className="block rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-brand-500 hover:shadow-sm"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-[17px] font-bold leading-snug">{crew.name}</h3>
+        {crew.myRole === 'OWNER' && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <Crown className="size-3" aria-hidden />
+            크루장
+          </span>
+        )}
+      </div>
+      {crew.description && <p className="mt-1 line-clamp-1 text-sm text-stone-500">{crew.description}</p>}
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-stone-600">
+        <span className="inline-flex items-center gap-1">
+          <CalendarDays className="size-3.5 text-stone-400" aria-hidden />
+          {formatDays(crew.certDays)}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <Users className="size-3.5 text-stone-400" aria-hidden />
+          {crew.memberCount}/{crew.maxMembers}명
+        </span>
+        <span>벌금 {formatPoints(crew.penaltyPoints)}</span>
+      </div>
+    </Link>
+  )
+}
+
+function EmptyCrews() {
+  const navigate = useNavigate()
+  return (
+    <section className="mt-8 flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
+      <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-3xl">🌱</div>
+      <h2 className="mt-5 text-lg font-semibold">아직 참여한 크루가 없어요</h2>
+      <p className="mt-2 text-sm leading-relaxed text-stone-500">
+        크루를 직접 만들거나, 친구에게 받은
+        <br />
+        초대 코드로 참여해 보세요.
+      </p>
+      <div className="mt-8 flex w-full flex-col gap-2">
+        <Button onClick={() => navigate('/crews/new')}>
+          <Plus className="size-4" aria-hidden />
+          크루 만들기
+        </Button>
+        <Button variant="ghost" onClick={() => navigate('/join')}>
+          <Ticket className="size-4" aria-hidden />
+          초대 코드로 참여
+        </Button>
+      </div>
+    </section>
   )
 }

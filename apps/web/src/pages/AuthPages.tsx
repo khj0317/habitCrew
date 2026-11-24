@@ -2,6 +2,7 @@ import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'reac
 import { Link, useLocation, useNavigate } from 'react-router'
 import { Alert, Button, Field, Logo } from '../components/ui'
 import { ApiError } from '../lib/api'
+import { useRedirectTarget } from '../lib/redirect'
 import { useAuth } from '../providers/authContext'
 
 function AuthLayout({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
@@ -17,16 +18,10 @@ function AuthLayout({ title, subtitle, children }: { title: string; subtitle: st
   )
 }
 
-/** 로그인 후 원래 가려던 페이지로 돌려보낸다 (외부 주소로는 보내지 않음) */
-function useRedirectTarget() {
-  const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from
-  return from && from.startsWith('/') && !from.startsWith('//') ? from : '/'
-}
-
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const target = useRedirectTarget()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -74,7 +69,7 @@ export function LoginPage() {
       </form>
       <p className="mt-6 text-center text-sm text-stone-500">
         아직 계정이 없나요?{' '}
-        <Link to="/signup" className="font-semibold text-brand-700 hover:underline">
+        <Link to="/signup" state={location.state} className="font-semibold text-brand-700 hover:underline">
           회원가입
         </Link>
       </p>
@@ -85,6 +80,8 @@ export function LoginPage() {
 export function SignupPage() {
   const { signup } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const target = useRedirectTarget()
   const [form, setForm] = useState({ email: '', password: '', nickname: '' })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
@@ -102,7 +99,7 @@ export function SignupPage() {
     setSubmitting(true)
     try {
       await signup(form.email, form.password, form.nickname)
-      navigate('/', { replace: true })
+      navigate(target, { replace: true })
     } catch (err) {
       if (!(err instanceof ApiError)) {
         setError('회원가입하지 못했어요.')
@@ -161,7 +158,7 @@ export function SignupPage() {
       </form>
       <p className="mt-6 text-center text-sm text-stone-500">
         이미 계정이 있나요?{' '}
-        <Link to="/login" className="font-semibold text-brand-700 hover:underline">
+        <Link to="/login" state={location.state} className="font-semibold text-brand-700 hover:underline">
           로그인
         </Link>
       </p>

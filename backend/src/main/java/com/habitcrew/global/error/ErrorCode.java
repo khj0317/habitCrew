@@ -25,7 +25,19 @@ public enum ErrorCode {
     // 회원
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 가입된 이메일입니다."),
-    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.");
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
+
+    // 크루
+    CREW_NOT_FOUND(HttpStatus.NOT_FOUND, "크루를 찾을 수 없어요."),
+    INVALID_INVITE_CODE(HttpStatus.NOT_FOUND, "초대 코드가 올바르지 않아요. 크루장에게 코드를 다시 확인해 주세요."),
+    ALREADY_JOINED(HttpStatus.CONFLICT, "이미 참여한 크루예요."),
+    CREW_FULL(HttpStatus.CONFLICT, "크루 정원이 가득 찼어요."),
+    TOO_MANY_CREWS(HttpStatus.CONFLICT, "크루는 최대 10개까지 참여할 수 있어요."),
+    NOT_CREW_OWNER(HttpStatus.FORBIDDEN, "크루장만 할 수 있어요."),
+    OWNER_CANNOT_LEAVE(HttpStatus.CONFLICT, "크루장은 다른 크루원에게 크루장을 넘긴 뒤에 나갈 수 있어요."),
+    CANNOT_TARGET_SELF(HttpStatus.BAD_REQUEST, "자기 자신에게는 할 수 없어요."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "크루원을 찾을 수 없어요."),
+    MAX_MEMBERS_BELOW_CURRENT(HttpStatus.BAD_REQUEST, "정원은 지금 인원보다 적게 줄일 수 없어요.");
 
     private final HttpStatus status;
     private final String message;
