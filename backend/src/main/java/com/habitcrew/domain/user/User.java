@@ -38,12 +38,26 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** 체험 계정이면 사라지는 시각, 일반 회원이면 null */
+    @Column(name = "guest_expires_at")
+    private Instant guestExpiresAt;
+
     public User(String email, String passwordHash, String nickname, Instant now) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.nickname = nickname;
         this.createdAt = now;
         this.updatedAt = now;
+    }
+
+    public static User guest(String email, String passwordHash, String nickname, Instant now, Instant expiresAt) {
+        User user = new User(email, passwordHash, nickname, now);
+        user.guestExpiresAt = expiresAt;
+        return user;
+    }
+
+    public boolean isGuest() {
+        return guestExpiresAt != null;
     }
 
     @PreUpdate

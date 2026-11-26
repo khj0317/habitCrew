@@ -27,7 +27,8 @@ import java.time.Duration;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 // 테스트 중에는 정산 스케줄러가 저절로 돌지 않게 끄고, 테스트에서 직접 부른다
-@SpringBootTest(properties = {"habitcrew.settlement.enabled=false", "habitcrew.push.reminder-enabled=false"})
+@SpringBootTest(properties = {"habitcrew.settlement.enabled=false", "habitcrew.push.reminder-enabled=false",
+        "habitcrew.guest.cleanup-enabled=false"})
 @AutoConfigureMockMvc
 @Import(IntegrationTest.Containers.class)
 public @interface IntegrationTest {

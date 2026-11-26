@@ -7,6 +7,8 @@ export type AuthState = {
   restoring: boolean
   login: (email: string, password: string) => Promise<void>
   signup: (email: string, password: string, nickname: string) => Promise<void>
+  /** 로그인 없이 둘러보기: 체험 계정을 만들어 바로 로그인한다 */
+  startGuest: () => Promise<void>
   logout: () => Promise<void>
 }
 

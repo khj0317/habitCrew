@@ -51,6 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession],
   )
 
+  const startGuest = useCallback(async () => {
+    applySession(await api<TokenResponse>('/api/auth/guest', { method: 'POST', auth: false }))
+  }, [applySession])
+
   const logout = useCallback(async () => {
     try {
       await api<void>('/api/auth/logout', { method: 'POST', auth: false })
@@ -61,6 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [queryClient])
 
-  const value = useMemo(() => ({ user, restoring, login, signup, logout }), [user, restoring, login, signup, logout])
+  const value = useMemo(
+    () => ({ user, restoring, login, signup, startGuest, logout }),
+    [user, restoring, login, signup, startGuest, logout],
+  )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

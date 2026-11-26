@@ -53,6 +53,10 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없어요."),
     NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "내 댓글만 지울 수 있어요."),
 
+    // 체험 계정
+    GUEST_RESTRICTED(HttpStatus.FORBIDDEN, "체험 계정에서는 다른 크루에 참여할 수 없어요. 회원가입 후 이용해 주세요."),
+    GUEST_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "체험 계정을 너무 많이 만들었어요. 잠시 후 다시 시도해 주세요."),
+
     // 알림
     INVALID_PUSH_SUBSCRIPTION(HttpStatus.BAD_REQUEST, "알림 구독 정보가 올바르지 않아요."),
     PUSH_NOT_SUBSCRIBED(HttpStatus.BAD_REQUEST, "먼저 이 기기에서 알림을 켜 주세요.");

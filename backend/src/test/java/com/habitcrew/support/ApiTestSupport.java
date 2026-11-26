@@ -32,7 +32,7 @@ public abstract class ApiTestSupport {
         clock.reset();
     }
 
-    protected record TestUser(Long id, String nickname, String token) {
+    public record TestUser(Long id, String nickname, String token) {
         public String bearer() {
             return "Bearer " + token;
         }

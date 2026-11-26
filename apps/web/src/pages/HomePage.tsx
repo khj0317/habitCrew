@@ -1,5 +1,6 @@
 import { CalendarDays, Crown, LogOut, Plus, Ticket, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
+import { GuestBanner } from '../components/GuestBanner'
 import { PushCard } from '../components/PushCard'
 import { Button, ErrorState, Logo } from '../components/ui'
 import { useMyCrews } from '../lib/crews'
@@ -30,7 +31,8 @@ export function HomePage() {
           <h1 className="text-2xl font-bold">{user?.nickname}님 🙌</h1>
         </section>
 
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col gap-3">
+          <GuestBanner />
           <PushCard />
         </div>
 

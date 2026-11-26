@@ -77,6 +77,7 @@ public class CrewService {
     @Transactional(readOnly = true)
     public CrewResponses.InvitePreview preview(Long userId, String rawCode) {
         Crew crew = crewRepository.findByInviteCode(CrewRequests.normalizeCode(rawCode))
+                .filter(c -> !isGuestCrew(c))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INVITE_CODE));
         String ownerNickname = userRepository.findById(crew.getOwnerId()).map(User::getNickname).orElse("");
         return new CrewResponses.InvitePreview(crew.getId(), crew.getName(), crew.getDescription(),
@@ -92,7 +93,12 @@ public class CrewService {
     @Transactional
     public CrewResponses.Detail join(Long userId, CrewRequests.Join request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        // 체험 계정은 실제 크루에 섞이지 않는다 (24시간 뒤 지워질 때 실제 크루의 기록이 함께 사라지지 않게)
+        if (user.isGuest()) {
+            throw new BusinessException(ErrorCode.GUEST_RESTRICTED);
+        }
         Crew crew = crewRepository.findByInviteCodeForUpdate(request.inviteCode())
+                .filter(c -> !isGuestCrew(c))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INVITE_CODE));
 
         if (memberRepository.existsByCrewIdAndUserId(crew.getId(), userId)) {
@@ -157,6 +163,11 @@ public class CrewService {
         crew.changeOwner(target.getUser().getId());
         memberRepository.flush();
         return detail(userId, crewId);
+    }
+
+    /** 체험 계정이 만든(또는 넘겨받은) 체험용 크루. 초대 코드로 다른 사람이 들어올 수 없다 */
+    private boolean isGuestCrew(Crew crew) {
+        return userRepository.findById(crew.getOwnerId()).map(User::isGuest).orElse(false);
     }
 
     /** 크루원이 아니면 크루가 있는지조차 알려 주지 않는다 (404) */

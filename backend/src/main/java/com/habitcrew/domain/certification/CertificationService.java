@@ -275,7 +275,13 @@ public class CertificationService {
 
     private void deletePhotos(String... keys) {
         for (String key : keys) {
-            photoStorage.delete(key);
+            // 체험 크루가 같이 쓰는 샘플 사진은 지우지 않는다
+            if (!key.startsWith(SAMPLE_PREFIX)) {
+                photoStorage.delete(key);
+            }
         }
     }
+
+    /** 체험 계정용 샘플 사진이 저장되는 경로 */
+    public static final String SAMPLE_PREFIX = "samples/";
 }

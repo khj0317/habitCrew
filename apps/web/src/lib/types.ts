@@ -1,8 +1,12 @@
 export type User = {
   id: number
-  email: string
+  /** 체험 계정은 null */
+  email: string | null
   nickname: string
   createdAt: string
+  guest: boolean
+  /** 체험 계정이 사라지는 시각 */
+  guestExpiresAt: string | null
 }
 
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'

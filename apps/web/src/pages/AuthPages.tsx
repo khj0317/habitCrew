@@ -19,7 +19,7 @@ function AuthLayout({ title, subtitle, children }: { title: string; subtitle: st
 }
 
 export function LoginPage() {
-  const { login } = useAuth()
+  const { login, startGuest } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const target = useRedirectTarget()
@@ -27,6 +27,20 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [startingGuest, setStartingGuest] = useState(false)
+
+  async function onGuest() {
+    setError(null)
+    setStartingGuest(true)
+    try {
+      await startGuest()
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : '체험 계정을 만들지 못했어요.')
+    } finally {
+      setStartingGuest(false)
+    }
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -63,7 +77,7 @@ export function LoginPage() {
           required
         />
         {error && <Alert>{error}</Alert>}
-        <Button type="submit" loading={submitting} className="mt-2">
+        <Button type="submit" loading={submitting} disabled={startingGuest} className="mt-2">
           로그인
         </Button>
       </form>
@@ -72,6 +86,18 @@ export function LoginPage() {
         <Link to="/signup" state={location.state} className="font-semibold text-brand-700 hover:underline">
           회원가입
         </Link>
+      </p>
+
+      <div className="mt-10 flex items-center gap-3 text-xs text-stone-400" aria-hidden>
+        <span className="h-px flex-1 bg-stone-200" />
+        또는
+        <span className="h-px flex-1 bg-stone-200" />
+      </div>
+      <Button variant="secondary" className="mt-4" onClick={onGuest} loading={startingGuest} disabled={submitting}>
+        로그인 없이 둘러보기 👀
+      </Button>
+      <p className="mt-2 text-center text-xs leading-relaxed text-stone-400">
+        2주치 기록이 채워진 체험 크루로 바로 시작해요. 체험 계정은 24시간 뒤 사라져요.
       </p>
     </AuthLayout>
   )

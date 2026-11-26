@@ -52,7 +52,8 @@ public class AuthService {
         String email = request.email();
         loginAttemptLimiter.checkNotLocked(email);
 
-        User user = userRepository.findByEmail(email).orElse(null);
+        // 체험 계정은 비밀번호로 로그인할 수 없다 (체험하기 버튼으로만 만들어지고, 비밀번호는 아무도 모른다)
+        User user = userRepository.findByEmail(email).filter(u -> !u.isGuest()).orElse(null);
         String hash = user == null ? dummyHash() : user.getPasswordHash();
         if (!passwordEncoder.matches(request.password(), hash) || user == null) {
             loginAttemptLimiter.recordFailure(email);
@@ -68,6 +69,7 @@ public class AuthService {
         Long userId = refreshTokenStore.consume(refreshToken)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
         User user = userRepository.findById(userId)
+                .filter(u -> !u.isGuest() || u.getGuestExpiresAt().isAfter(clock.instant())) // 만료된 체험 계정
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
         return issue(user);
     }
@@ -76,7 +78,8 @@ public class AuthService {
         refreshTokenStore.consume(refreshToken);
     }
 
-    private Session issue(User user) {
+    /** 체험 계정처럼 비밀번호 없이 만든 사용자에게 로그인 세션을 준다 */
+    public Session issue(User user) {
         String accessToken = accessTokenIssuer.issue(user.getId());
         String refreshToken = refreshTokenStore.issue(user.getId());
         TokenResponse body = new TokenResponse(accessToken, accessTokenIssuer.ttlSeconds(), UserResponse.from(user));
