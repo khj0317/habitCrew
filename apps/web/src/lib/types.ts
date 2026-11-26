@@ -104,6 +104,22 @@ export type Settlement = {
 
 export type SettlementHistory = { items: Settlement[]; nextBefore: string | null }
 
+export type Ranking = {
+  month: string
+  entries: { rank: number; userId: number; nickname: string; count: number }[]
+}
+
+export type DayStatus = 'CERTIFIED' | 'MISSED' | 'REST' | 'PENDING' | 'FUTURE' | 'NOT_JOINED'
+
+export type CalendarMonth = {
+  month: string
+  userId: number
+  nickname: string
+  certifiedCount: number
+  missedCount: number
+  days: { date: string; status: DayStatus }[]
+}
+
 export type TokenResponse = {
   accessToken: string
   expiresIn: number

@@ -37,6 +37,11 @@ public class SettlementService {
     private final NamedParameterJdbcTemplate jdbc;
     private final ServiceTime serviceTime;
 
+    @Transactional(readOnly = true)
+    public List<Long> allCrewIds() {
+        return jdbc.queryForList("select id from crews", Map.of(), Long.class);
+    }
+
     /** 이 날짜에 정산해야 하는(인증 요일이고, 그날 끝나기 전에 만들어졌고, 아직 정산하지 않은) 크루 */
     @Transactional(readOnly = true)
     public List<Long> crewsToSettle(LocalDate date) {

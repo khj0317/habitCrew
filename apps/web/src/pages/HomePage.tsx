@@ -1,5 +1,6 @@
 import { CalendarDays, Crown, LogOut, Plus, Ticket, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
+import { PushCard } from '../components/PushCard'
 import { Button, ErrorState, Logo } from '../components/ui'
 import { useMyCrews } from '../lib/crews'
 import { formatDays, formatPoints } from '../lib/format'
@@ -28,6 +29,10 @@ export function HomePage() {
           <p className="text-stone-500">안녕하세요,</p>
           <h1 className="text-2xl font-bold">{user?.nickname}님 🙌</h1>
         </section>
+
+        <div className="mt-6">
+          <PushCard />
+        </div>
 
         {isPending ? (
           <div className="mt-8 flex flex-col gap-3" aria-label="불러오는 중">

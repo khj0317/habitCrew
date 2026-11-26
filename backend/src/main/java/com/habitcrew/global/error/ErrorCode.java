@@ -51,7 +51,11 @@ public enum ErrorCode {
     NOT_CERTIFICATION_AUTHOR(HttpStatus.FORBIDDEN, "내 인증만 지울 수 있어요."),
     PAST_CERTIFICATION(HttpStatus.CONFLICT, "지난 날짜의 인증은 지울 수 없어요. 이미 정산에 반영됐어요."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없어요."),
-    NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "내 댓글만 지울 수 있어요.");
+    NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "내 댓글만 지울 수 있어요."),
+
+    // 알림
+    INVALID_PUSH_SUBSCRIPTION(HttpStatus.BAD_REQUEST, "알림 구독 정보가 올바르지 않아요."),
+    PUSH_NOT_SUBSCRIBED(HttpStatus.BAD_REQUEST, "먼저 이 기기에서 알림을 켜 주세요.");
 
     private final HttpStatus status;
     private final String message;

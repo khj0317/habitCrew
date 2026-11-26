@@ -27,7 +27,7 @@ import java.time.Duration;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 // 테스트 중에는 정산 스케줄러가 저절로 돌지 않게 끄고, 테스트에서 직접 부른다
-@SpringBootTest(properties = "habitcrew.settlement.enabled=false")
+@SpringBootTest(properties = {"habitcrew.settlement.enabled=false", "habitcrew.push.reminder-enabled=false"})
 @AutoConfigureMockMvc
 @Import(IntegrationTest.Containers.class)
 public @interface IntegrationTest {
@@ -63,6 +63,13 @@ public @interface IntegrationTest {
         DynamicPropertyRegistrar storageProperties(GenericContainer<?> seaweedfs) {
             return registry -> registry.add("habitcrew.storage.endpoint",
                     () -> "http://" + seaweedfs.getHost() + ":" + seaweedfs.getMappedPort(8333));
+        }
+
+        /** 테스트에서는 실제 푸시 서버로 보내지 않는다 */
+        @Bean
+        @Primary
+        RecordingPushGateway recordingPushGateway() {
+            return new RecordingPushGateway();
         }
 
         /** 테스트에서 날짜·시각을 옮길 수 있게 실제 시계 대신 쓴다 */

@@ -1,5 +1,6 @@
 package com.habitcrew.domain.settlement;
 
+import com.habitcrew.domain.record.RankingService;
 import com.habitcrew.global.time.ServiceTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 /**
  * 밀린 정산을 모두 처리한다 (매일 00:05, 그리고 서버가 뜰 때).
@@ -30,13 +32,15 @@ public class SettlementRunner {
     static final long LOCK_KEY = 4_820_001L;
 
     private final SettlementService settlementService;
+    private final RankingService rankingService;
     private final ServiceTime serviceTime;
     private final DataSource dataSource;
     private final int catchUpDays;
 
-    public SettlementRunner(SettlementService settlementService, ServiceTime serviceTime, DataSource dataSource,
-                            @Value("${habitcrew.settlement.catch-up-days}") int catchUpDays) {
+    public SettlementRunner(SettlementService settlementService, RankingService rankingService, ServiceTime serviceTime,
+                            DataSource dataSource, @Value("${habitcrew.settlement.catch-up-days}") int catchUpDays) {
         this.settlementService = settlementService;
+        this.rankingService = rankingService;
         this.serviceTime = serviceTime;
         this.dataSource = dataSource;
         this.catchUpDays = catchUpDays;
@@ -53,6 +57,8 @@ public class SettlementRunner {
             for (LocalDate date = today.minusDays(catchUpDays); date.isBefore(today); date = date.plusDays(1)) {
                 settled += settleDate(date);
             }
+            // 하루에 한 번은 랭킹 캐시를 DB와 맞춘다 (드물게 생길 수 있는 차이를 스스로 고친다)
+            rankingService.invalidate(settlementService.allCrewIds(), YearMonth.from(today));
             return settled;
         });
     }

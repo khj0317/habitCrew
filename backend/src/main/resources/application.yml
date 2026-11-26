@@ -67,6 +67,17 @@ habitcrew:
     cron: "0 5 0 * * *"
     # 서버가 꺼져 있어 놓친 정산을 며칠 전까지 거슬러 올라가 따라잡을지
     catch-up-days: 7
+  # 웹 푸시 알림
+  push:
+    # VAPID 연락처 (푸시 서버가 문제가 있을 때 연락하는 주소). 배포 시 실제 주소로
+    subject: ${VAPID_SUBJECT:mailto:noreply@habitcrew.local}
+    # 비워 두면 처음 뜰 때 만들어 DB에 저장한다. 서버를 여러 환경에 띄울 때는 같은 값을 넣는다 (base64url)
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    reminder-enabled: ${PUSH_REMINDER_ENABLED:true}
+    reminder-cron: "0 0 22 * * *"
+    # 이 도메인의 푸시 서버로만 보낸다 (SSRF 방지): 크롬·엣지(FCM), 파이어폭스, 사파리, 윈도우
+    allowed-hosts: fcm.googleapis.com, updates.push.services.mozilla.com, web.push.apple.com, "*.push.apple.com", "*.notify.windows.com"
   # 로그인 실패 제한: 같은 이메일로 5번 틀리면 10분 잠금
   login-limit:
     max-attempts: 5

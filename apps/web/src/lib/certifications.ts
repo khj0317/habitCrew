@@ -56,6 +56,8 @@ export function useCreateCertification(crewId: number) {
       queryClient.invalidateQueries({ queryKey: certKeys.today(crewId) })
       queryClient.invalidateQueries({ queryKey: certKeys.feed(crewId) })
       queryClient.invalidateQueries({ queryKey: ['crews', crewId, 'stats'] }) // 연속 인증이 늘어난다
+      queryClient.invalidateQueries({ queryKey: ['crews', crewId, 'ranking'] })
+      queryClient.invalidateQueries({ queryKey: ['crews', crewId, 'calendar'] })
     },
   })
 }
@@ -69,6 +71,8 @@ export function useDeleteCertification(crewId: number) {
       queryClient.invalidateQueries({ queryKey: certKeys.today(crewId) })
       queryClient.invalidateQueries({ queryKey: certKeys.feed(crewId) })
       queryClient.invalidateQueries({ queryKey: ['crews', crewId, 'stats'] })
+      queryClient.invalidateQueries({ queryKey: ['crews', crewId, 'ranking'] })
+      queryClient.invalidateQueries({ queryKey: ['crews', crewId, 'calendar'] })
     },
   })
 }

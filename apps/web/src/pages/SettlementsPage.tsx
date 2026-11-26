@@ -1,21 +1,39 @@
+import { useState } from 'react'
 import { useParams } from 'react-router'
+import { CalendarCard, MonthSwitcher, RankingCard } from '../components/RecordSections'
 import { Avatar, Button, ErrorState, PageHeader } from '../components/ui'
 import { useCrew } from '../lib/crews'
 import { formatPoints } from '../lib/format'
+import { currentMonth } from '../lib/records'
 import { useCrewStats, useSettlementHistory } from '../lib/settlements'
 
-/** 정산 내역: 날짜별로 누가 인증을 빼먹어 벌금을 받았는지, 그리고 크루원별 누적 기록 */
+/** 크루 기록: 월간 랭킹, 인증 달력, 크루원 누적 기록, 날짜별 정산 내역 */
 export function SettlementsPage() {
   const crewId = Number(useParams().crewId)
   const { data: crew } = useCrew(crewId)
   const { data: stats } = useCrewStats(crewId)
   const { data, isPending, isError, hasNextPage, fetchNextPage, isFetchingNextPage } = useSettlementHistory(crewId)
   const items = data?.pages.flatMap((p) => p.items) ?? []
+  const [month, setMonth] = useState(currentMonth)
+  const [calendarUserId, setCalendarUserId] = useState<number | null>(null)
 
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md pb-12">
-      <PageHeader title={crew ? `${crew.name} 정산` : '정산 내역'} back={`/crews/${crewId}`} />
+      <PageHeader title={crew ? `${crew.name} 기록` : '기록'} back={`/crews/${crewId}`} />
       <main className="flex flex-col gap-6 px-5">
+        {stats && (
+          <>
+            <MonthSwitcher month={month} onChange={setMonth} />
+            <RankingCard crewId={crewId} month={month} myUserId={stats.me.userId} />
+            <CalendarCard
+              crewId={crewId}
+              month={month}
+              members={stats.members}
+              selectedUserId={calendarUserId ?? stats.me.userId}
+              onSelectUser={setCalendarUserId}
+            />
+          </>
+        )}
         {stats && (
           <section className="rounded-3xl border border-stone-200 bg-white p-5">
             <h2 className="font-semibold">크루원 기록</h2>

@@ -12,6 +12,7 @@ import com.habitcrew.global.error.BusinessException;
 import com.habitcrew.global.error.ErrorCode;
 import com.habitcrew.global.storage.PhotoStorage;
 import com.habitcrew.global.time.ServiceTime;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class CertificationService {
     private final ServiceTime serviceTime;
     private final TransactionTemplate transaction;
     private final TransactionTemplate readOnly;
+    private final ApplicationEventPublisher events;
 
     public CertificationService(CertificationRepository certificationRepository,
                                 CertificationCommentRepository commentRepository,
@@ -54,7 +56,9 @@ public class CertificationService {
                                 ImageProcessor imageProcessor,
                                 PhotoStorage photoStorage,
                                 ServiceTime serviceTime,
-                                PlatformTransactionManager transactionManager) {
+                                PlatformTransactionManager transactionManager,
+                                ApplicationEventPublisher events) {
+        this.events = events;
         this.certificationRepository = certificationRepository;
         this.commentRepository = commentRepository;
         this.crewRepository = crewRepository;
@@ -100,8 +104,10 @@ public class CertificationService {
             photoStorage.put(thumbnailKey, image.thumbnail(), "image/jpeg");
             Certification saved = transaction.execute(status -> {
                 User user = userRepository.getReferenceById(userId);
-                return certificationRepository.saveAndFlush(new Certification(crewId, user, certDate, message,
-                        imageKey, thumbnailKey, image.width(), image.height(), serviceTime.now()));
+                Certification certification = certificationRepository.saveAndFlush(new Certification(crewId, user,
+                        certDate, message, imageKey, thumbnailKey, image.width(), image.height(), serviceTime.now()));
+                events.publishEvent(new CertificationEvent(CertificationEvent.Type.CREATED, crewId, userId, certDate));
+                return certification;
             });
             return readOnly.execute(status -> toItem(certificationRepository.findWithUser(saved.getId()).orElseThrow(),
                     userId, false));
@@ -164,6 +170,8 @@ public class CertificationService {
                 throw new BusinessException(ErrorCode.PAST_CERTIFICATION);
             }
             certificationRepository.delete(certification);
+            events.publishEvent(new CertificationEvent(CertificationEvent.Type.DELETED, certification.getCrewId(),
+                    userId, certification.getCertDate()));
             return certification;
         });
         deletePhotos(removed.getImageKey(), removed.getThumbnailKey());

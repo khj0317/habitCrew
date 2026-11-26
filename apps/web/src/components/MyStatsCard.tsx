@@ -26,7 +26,7 @@ export function MyStatsCard({ crewId }: { crewId: number }) {
         to={`/crews/${crewId}/settlements`}
         className="flex items-center justify-between border-t border-stone-100 px-5 py-3 text-sm text-stone-600 hover:bg-stone-50"
       >
-        정산 내역 보기
+        랭킹 · 달력 · 정산 내역 보기
         <ChevronRight className="size-4 text-stone-400" aria-hidden />
       </Link>
     </section>
