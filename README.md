@@ -1,6 +1,15 @@
 # HabitCrew 🌱
 
-> 크루와 함께 매일 인증하고, 빼먹으면 벌금 포인트가 쌓이는 습관 인증 서비스
+> 크루와 함께 매일 사진으로 인증하고, 빼먹으면 벌금 포인트가 쌓이는 습관 인증 서비스
+
+![CI](https://github.com/khj0317/habitCrew/actions/workflows/ci.yml/badge.svg)
+
+<p>
+  <img src="docs/screenshots/02-home.png" width="200" alt="홈" />
+  <img src="docs/screenshots/03-crew.png" width="200" alt="크루 화면: 오늘의 인증 현황과 내 기록" />
+  <img src="docs/screenshots/05-feed.png" width="200" alt="인증 피드" />
+  <img src="docs/screenshots/07-records.png" width="200" alt="월간 랭킹과 인증 달력" />
+</p>
 
 ## 바로 체험하기
 
@@ -8,14 +17,70 @@
 크루원 3명과 2주치 인증·좋아요·댓글·정산 기록이 채워진 체험 크루가 만들어져서, 랭킹·달력·연속 인증·벌금 화면이 처음부터 다 보입니다.
 오늘 인증은 비워 두었으니 사진을 직접 올려 보세요. 체험 계정은 24시간 뒤 자동으로 사라집니다.
 
+## 주요 기능
+
+- **크루**: 인증 요일·벌금·정원을 정해 만들고, 초대 코드·링크로 친구를 부른다
+- **사진 인증**: 인증일마다 사진 한 장. 오늘의 인증 현황과 마감까지 남은 시간을 보여 준다
+- **피드**: 크루원 인증을 최신순으로 보고 좋아요·댓글로 응원한다
+- **자정 정산**: 매일 0시 5분, 인증을 빼먹은 크루원에게 벌금 포인트를 매긴다
+- **기록**: 연속 인증(🔥), 월간 랭킹, 인증 달력(잔디), 날짜별 정산 내역
+- **알림·앱 설치**: 밤 10시 마감 알림(웹 푸시), 휴대폰 홈 화면에 앱처럼 설치(PWA)
+
 ## 기술 스택
 
 | 영역 | 기술 |
 |---|---|
 | 백엔드 | Java 21, Spring Boot 4, Spring Security (JWT), JPA, Flyway |
 | 데이터 | PostgreSQL 17, Redis 7, SeaweedFS (S3 호환 사진 저장소, AWS SDK v2) |
-| 프론트엔드 | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS 4 |
-| 테스트 | JUnit 5, Testcontainers (실제 PostgreSQL·Redis·SeaweedFS 컨테이너로 통합 테스트) |
+| 프론트엔드 | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS 4, PWA |
+| 테스트 | JUnit 5, Testcontainers (실제 PostgreSQL·Redis·SeaweedFS), Playwright E2E |
+| CI | GitHub Actions (백엔드 테스트, 웹 타입 검사·빌드) |
+
+## 구조
+
+```mermaid
+flowchart LR
+    Browser["브라우저 / PWA<br/>React · 서비스 워커"] -->|"/api (JWT)"| API["Spring Boot API"]
+    Browser -->|"서명 URL로 사진 보기"| S3[("SeaweedFS<br/>S3 호환")]
+    API --> PG[("PostgreSQL<br/>원본 데이터")]
+    API --> Redis[("Redis<br/>리프레시 토큰 · 랭킹 · 요청 제한")]
+    API -->|"사진 업로드"| S3
+    API -->|"암호화된 알림"| Push["푸시 서버<br/>FCM · Mozilla · Apple"]
+    Push --> Browser
+    Scheduler["스케줄러<br/>00:05 정산 · 22:00 알림 · 매시 체험 계정 정리"] --> API
+```
+
+## 문제 → 해결 → 결과
+
+| 문제 | 해결 | 결과 (테스트·측정) |
+|---|---|---|
+| 정원이 1자리 남았을 때 여러 명이 동시에 참여하면 정원을 넘는다 | 참여할 때 크루 행에 `SELECT ... FOR UPDATE` 잠금 | 남은 2자리에 10명 동시 참여 → 정확히 2명. **잠금을 빼면 10명 모두 들어가 테스트가 실패하는 것까지 확인** |
+| 23:59:50에 올리기 시작한 사진이 자정을 넘겨 끝나면 다음 날 인증이 된다 | 요청 본문을 읽기 전 필터에서 **도착 시각**을 기록해 그 날짜(KST)로 인증 | 시계를 화요일 00:00:05로 옮기고 월요일 23:59:59 요청을 처리 → 월요일 인증 |
+| 정산이 두 번 돌면 벌금도 두 번 매겨진다 (재시작, 서버 여러 대) | 정산 기록 기본 키로 먼저 "찜" + 벌금 유니크 제약 + PostgreSQL 어드바이저리 락 | 5개 스레드 동시 정산 → 한 번만. 재실행 3번 → 0건 추가 |
+| 배포 중이라 자정에 서버가 꺼져 있으면 그날 정산을 놓친다 | 서버가 뜰 때·매일 돌 때 최근 7일 중 안 한 날을 모두 따라잡기 | 실제로 PC가 꺼졌다 켜진 날 이틀치가 자동 정산됨 |
+| 피드를 OFFSET으로 넘기면 뒤 페이지일수록 느려진다 | `id < 마지막 id` 커서 + `(crew_id, id DESC)` 인덱스 | 인증 20만 건에서 19만 번째 페이지: **OFFSET 64ms → 커서 0.12ms (약 500배)** |
+| 목록마다 쿼리를 한 번씩 더 보내는 N+1 | `join fetch`, 집계 쿼리 한 번, `default_batch_fetch_size` | 크루원 2명·10명일 때 화면마다 SQL 수가 같음을 테스트로 고정. 일부러 N+1을 넣으면 5번 → 13번으로 늘어 테스트가 잡아냄 |
+| 스마트폰 원본 사진(5MB)을 그대로 쓰면 느리고 데이터가 많이 든다 | 브라우저에서 1600px로 줄여 올리고, 서버가 1600px·480px 썸네일로 다시 저장 | 5.0MB → 170KB(크게 보기). 피드는 썸네일만 받음 |
+| 탭 두 개에서 동시에 토큰을 재발급하면 둘 다 로그아웃된다 | 재발급 실패 시 쿠키를 지우지 않고, 실패한 탭은 다른 탭이 갱신한 쿠키로 재시도 | 동시 재발급 테스트: 한쪽만 성공, 이긴 쪽 토큰은 계속 사용 가능 |
+| 사용자가 보낸 푸시 구독 주소로 서버가 요청을 보낸다 (SSRF) | https + 알려진 푸시 서버 도메인만 허용, 리다이렉트 안 따라감 | `169.254.169.254`, `fcm.googleapis.com.evil.com` 등 5가지 주소 거부 테스트 |
+
+자세한 측정 방법과 표는 [docs/performance.md](docs/performance.md)에 있습니다.
+
+## 테스트
+
+- **백엔드 통합 테스트 68개**: 실제 PostgreSQL·Redis·SeaweedFS 컨테이너(Testcontainers)로 API를 끝까지 호출합니다. 시계를 옮겨 자정·요일 경계를 재현하고, 여러 스레드로 동시 요청을 재현합니다.
+- **E2E 테스트 (Playwright)**: 휴대폰 화면 크기의 실제 브라우저로 "둘러보기 → 사진 인증 → 좋아요·댓글 → 기록"과 "가입 → 크루 만들기 → 초대 링크로 참여"를 끝까지 눌러 봅니다. 위 스크린샷도 이 테스트가 찍었습니다.
+- **성능 측정**: `./gradlew benchmark` (일반 테스트에서는 빠짐)
+
+```powershell
+npm run test:api
+```
+
+```powershell
+npm run test:e2e -w @habitcrew/web
+```
+
+E2E는 `dev.cmd`로 서버를 켠 뒤에 돌립니다. 스크린샷을 다시 찍으려면 `SCREENSHOTS=1`을 붙입니다.
 
 ## 실행 방법
 
@@ -32,8 +97,6 @@
 
 `infra/seaweedfs/s3.json`과 `docker-compose.yml`의 접근 키·비밀번호는 로컬 개발 전용입니다. 배포할 때는 환경 변수(`STORAGE_ACCESS_KEY` 등)로 실제 값을 넣습니다.
 
-백엔드 테스트: `npm run test:api`
-
 자정 정산을 기다리지 않고 바로 돌려 보려면 (local 프로필 전용, 로그인 토큰 필요): `POST /api/dev/settlements/run` (밀린 정산 전체) 또는 `?date=2026-11-23` (그날만)
 
 로컬 확인용 테스트 계정 (로컬 DB에만 있음, 비밀번호는 둘 다 `Habit1234`): `demo@habitcrew.test`, `friend@habitcrew.test`
@@ -45,7 +108,12 @@
 - [x] **3단계: 인증**: 사진 업로드, 오늘의 인증 현황, 피드, 좋아요·댓글
 - [x] **4단계: 정산**: 자정 정산 스케줄러, 밀린 정산 따라잡기, 벌금 포인트, 연속 인증 일수, 정산 내역
 - [x] **5단계: 랭킹·알림**: Redis 월간 랭킹, 인증 달력(잔디), PWA(홈 화면 설치), 웹 푸시 마감 알림
-- [ ] **6단계: 품질**: 테스트 보강, 시드 데이터, 성능 측정
+- [x] **체험 계정**: 로그인 없이 둘러보기 (방문자마다 따로 쓰는 체험 크루, 24시간 뒤 자동 정리)
+- [x] **6단계: 품질**: N+1 쿼리 테스트, 성능 측정, Playwright E2E, GitHub Actions CI, 크루 삭제 시 사진 정리
+
+### 알려진 한계
+- 웹 푸시의 실제 수신은 크롬에서 직접 확인해야 합니다(아래 "푸시 알림 직접 확인하기"). 자동 테스트는 암호문을 RFC 순서대로 풀고 서명을 검증하는 데까지입니다.
+- 배포는 아직 하지 않았습니다. 사진 저장소·VAPID 키·JWT 비밀값은 환경 변수로 바꿔 넣도록 준비돼 있습니다.
 
 ## 설계 메모
 

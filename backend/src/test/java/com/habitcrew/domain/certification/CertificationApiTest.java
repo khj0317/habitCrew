@@ -349,6 +349,19 @@ class CertificationApiTest extends ApiTestSupport {
     }
 
     @Test
+    @DisplayName("크루가 사라지면(혼자 남은 크루장이 나가면) 저장소의 사진 파일도 함께 지워진다")
+    void photosRemovedWithCrew() throws Exception {
+        Crew crew = newCrew(EVERY_DAY);
+        JsonNode item = json(certify(crew, crew.owner(), png(400, 300), null));
+        assertThat(fetch(item.get("imageUrl").asString()).statusCode()).isEqualTo(200);
+
+        perform(delete("/api/crews/" + crew.id() + "/members/me"), crew.owner()).andExpect(status().isNoContent());
+
+        assertThat(fetch(item.get("imageUrl").asString()).statusCode()).isEqualTo(404);
+        assertThat(fetch(item.get("thumbnailUrl").asString()).statusCode()).isEqualTo(404);
+    }
+
+    @Test
     @DisplayName("지난 날짜의 인증과 남의 인증은 지울 수 없다")
     void cannotDeletePastOrOthers() throws Exception {
         Crew crew = newCrew(EVERY_DAY);

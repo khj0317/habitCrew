@@ -1,6 +1,6 @@
 package com.habitcrew.domain.guest;
 
-import com.habitcrew.domain.certification.CertificationService;
+import com.habitcrew.domain.certification.CertificationPhotos;
 import com.habitcrew.global.storage.PhotoStorage;
 import com.habitcrew.global.time.ServiceTime;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public class GuestCleanup {
                 select c.image_key, c.thumbnail_key from certifications c
                 where (c.user_id in (%1$s) or c.crew_id in (select id from crews where owner_id in (%1$s)))
                   and c.image_key not like ?
-                """.formatted(expired), now, now, CertificationService.SAMPLE_PREFIX + "%");
+                """.formatted(expired), now, now, CertificationPhotos.SAMPLE_PREFIX + "%");
 
         // 2) 체험 크루를 지우면 크루원·인증·좋아요·댓글·정산·벌금이 함께 지워진다 (ON DELETE CASCADE)
         jdbc.update("delete from crews where owner_id in (" + expired + ")", now);

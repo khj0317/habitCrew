@@ -66,6 +66,12 @@ public @interface IntegrationTest {
                     () -> "http://" + seaweedfs.getHost() + ":" + seaweedfs.getMappedPort(8333));
         }
 
+        /** SQL 문장 수를 세서 N+1 쿼리를 잡는다 */
+        @Bean
+        static QueryCounter queryCounter() {
+            return new QueryCounter();
+        }
+
         /** 테스트에서는 실제 푸시 서버로 보내지 않는다 */
         @Bean
         @Primary

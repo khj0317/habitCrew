@@ -1,5 +1,6 @@
 package com.habitcrew.domain.crew;
 
+import com.habitcrew.domain.certification.CertificationPhotos;
 import com.habitcrew.domain.crew.CrewMember.Role;
 import com.habitcrew.domain.crew.dto.CrewRequests;
 import com.habitcrew.domain.crew.dto.CrewResponses;
@@ -27,6 +28,7 @@ public class CrewService {
     private final CrewMemberRepository memberRepository;
     private final UserRepository userRepository;
     private final InviteCodeGenerator inviteCodeGenerator;
+    private final CertificationPhotos certificationPhotos;
     private final Clock clock;
 
     @Transactional
@@ -130,7 +132,9 @@ public class CrewService {
             if (memberRepository.countByCrewId(crewId) > 1) {
                 throw new BusinessException(ErrorCode.OWNER_CANNOT_LEAVE);
             }
-            crewRepository.delete(me.getCrew()); // crew_members는 ON DELETE CASCADE
+            // DB 기록(크루원·인증·정산 등)은 ON DELETE CASCADE로 함께 지워지지만, 저장소의 사진 파일은 따로 지워야 한다
+            certificationPhotos.deleteAfterCommit(certificationPhotos.keysOfCrew(crewId));
+            crewRepository.delete(me.getCrew());
             return;
         }
         memberRepository.delete(me);

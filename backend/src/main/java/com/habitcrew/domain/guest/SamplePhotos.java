@@ -1,6 +1,6 @@
 package com.habitcrew.domain.guest;
 
-import com.habitcrew.domain.certification.CertificationService;
+import com.habitcrew.domain.certification.CertificationPhotos;
 import com.habitcrew.domain.certification.ImageProcessor;
 import com.habitcrew.global.storage.PhotoStorage;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +76,7 @@ public class SamplePhotos {
             StringBuilder value = new StringBuilder();
             for (int i = 0; i < THEMES.size(); i++) {
                 ImageProcessor.Result image = imageProcessor.process(draw(THEMES.get(i)));
-                String base = CertificationService.SAMPLE_PREFIX + "v1/" + i;
+                String base = CertificationPhotos.SAMPLE_PREFIX + "v1/" + i;
                 storage.put(base + ".jpg", image.display(), "image/jpeg");
                 storage.put(base + "_thumb.jpg", image.thumbnail(), "image/jpeg");
                 value.append(base).append(".jpg|").append(base).append("_thumb.jpg|")

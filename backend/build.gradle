@@ -48,9 +48,25 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'benchmark'
+	}
 	// 인증 마감·자정 정산이 서비스 기준 시간대(KST)로 동작하는지 어디서든 똑같이 검증한다
 	jvmArgs '-Duser.timezone=Asia/Seoul'
+}
+
+// 성능 측정 (일반 테스트에서는 빠진다): ./gradlew benchmark → 결과는 build/benchmark/result.md
+tasks.register('benchmark', Test) {
+	description = '피드 페이지네이션·랭킹·사진 크기를 측정한다'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'benchmark'
+	}
+	jvmArgs '-Duser.timezone=Asia/Seoul'
+	systemProperty 'benchmark.output', layout.buildDirectory.file('benchmark/result.md').get().asFile.absolutePath
+	outputs.upToDateWhen { false }
 }
 
 tasks.named('bootRun') {

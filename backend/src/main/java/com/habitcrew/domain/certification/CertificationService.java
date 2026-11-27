@@ -47,6 +47,7 @@ public class CertificationService {
     private final TransactionTemplate transaction;
     private final TransactionTemplate readOnly;
     private final ApplicationEventPublisher events;
+    private final CertificationPhotos certificationPhotos;
 
     public CertificationService(CertificationRepository certificationRepository,
                                 CertificationCommentRepository commentRepository,
@@ -57,8 +58,10 @@ public class CertificationService {
                                 PhotoStorage photoStorage,
                                 ServiceTime serviceTime,
                                 PlatformTransactionManager transactionManager,
-                                ApplicationEventPublisher events) {
+                                ApplicationEventPublisher events,
+                                CertificationPhotos certificationPhotos) {
         this.events = events;
+        this.certificationPhotos = certificationPhotos;
         this.certificationRepository = certificationRepository;
         this.commentRepository = commentRepository;
         this.crewRepository = crewRepository;
@@ -274,14 +277,6 @@ public class CertificationService {
     }
 
     private void deletePhotos(String... keys) {
-        for (String key : keys) {
-            // 체험 크루가 같이 쓰는 샘플 사진은 지우지 않는다
-            if (!key.startsWith(SAMPLE_PREFIX)) {
-                photoStorage.delete(key);
-            }
-        }
+        certificationPhotos.deleteAfterCommit(java.util.List.of(keys));
     }
-
-    /** 체험 계정용 샘플 사진이 저장되는 경로 */
-    public static final String SAMPLE_PREFIX = "samples/";
 }
