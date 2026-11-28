@@ -70,7 +70,6 @@ function BrandPanel() {
           ))}
         </ul>
       </div>
-      <p className="relative text-sm text-white/60">포트폴리오 프로젝트 · Spring Boot · React</p>
     </aside>
   )
 }
