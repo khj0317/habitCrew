@@ -25,20 +25,40 @@ export function CertificationCard({ crewId, certification: c }: { crewId: number
         </time>
       </header>
 
-      <Link to={detail} className="block bg-stone-100" aria-label={`${c.author.nickname}님의 인증 사진 크게 보기`}>
-        {/* 휴대폰은 480px 썸네일(데이터 절약), 넓은 화면은 카드가 커서 1600px 사진을 쓴다 (작은 사진을 늘리면 흐려진다) */}
-        <picture>
-          <source media="(min-width: 1280px)" srcSet={c.imageUrl} />
-          <img
-            src={c.thumbnailUrl}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            // 사진 비율대로 자리를 미리 잡아 두어, 사진이 늦게 떠도 화면이 덜컹거리지 않게 한다
-            style={{ aspectRatio: `${c.imageWidth} / ${c.imageHeight}` }}
-            className="max-h-[28rem] w-full object-cover"
-          />
-        </picture>
+      <Link
+        to={detail}
+        className="relative block bg-stone-100"
+        aria-label={`${c.author.nickname}님의 인증 사진 크게 보기`}
+      >
+        {c.thumbnailUrl ? (
+          <>
+            {/* 휴대폰은 480px 썸네일(데이터 절약), 넓은 화면은 카드가 커서 1600px 사진을 쓴다 (작은 사진을 늘리면 흐려진다) */}
+            <picture>
+              {c.imageUrl && <source media="(min-width: 1280px)" srcSet={c.imageUrl} />}
+              <img
+                src={c.thumbnailUrl}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                // 사진 비율대로 자리를 미리 잡아 두어, 사진이 늦게 떠도 화면이 덜컹거리지 않게 한다
+                style={{ aspectRatio: `${c.imageWidth} / ${c.imageHeight}` }}
+                className={clsx('max-h-[28rem] w-full object-cover', c.hidden && 'opacity-60 grayscale')}
+              />
+            </picture>
+            {c.hidden && (
+              <span className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
+                🙈 가려진 사진 · 크루원에게 안 보여요
+              </span>
+            )}
+          </>
+        ) : (
+          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 text-stone-500">
+            <span className="text-3xl" aria-hidden>
+              🙈
+            </span>
+            <span className="text-sm">신고로 가려진 사진이에요</span>
+          </div>
+        )}
       </Link>
 
       <div className="px-4 pt-3 pb-4">

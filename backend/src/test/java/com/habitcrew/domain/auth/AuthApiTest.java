@@ -68,6 +68,14 @@ class AuthApiTest {
     }
 
     @Test
+    @DisplayName("한글 등 ASCII가 아닌 이메일은 받지 않는다 (메일 서버가 받지 못해 비밀번호 찾기 메일을 보낼 수 없으므로)")
+    void nonAsciiEmailRejected() throws Exception {
+        signup("한글-" + UUID.randomUUID().toString().substring(0, 6) + "@example.com", "Password1", uniqueNickname())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("email"));
+    }
+
+    @Test
     @DisplayName("비밀번호를 5번 틀리면 맞는 비밀번호로도 잠시 로그인할 수 없다")
     void loginLock() throws Exception {
         String email = uniqueEmail();

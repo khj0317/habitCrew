@@ -62,6 +62,10 @@ public class Certification {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /** 신고가 쌓이거나 크루장이 가린 사진. 기록·정산에는 그대로 남고 사진만 가린다 */
+    @Column(nullable = false, insertable = false, updatable = false)
+    private boolean hidden;
+
     public Certification(Long crewId, User user, LocalDate certDate, String message, String imageKey,
                          String thumbnailKey, int imageWidth, int imageHeight, Instant now) {
         this.crewId = crewId;

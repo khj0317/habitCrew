@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { LayoutGrid, LogOut, Plus, Ticket } from 'lucide-react'
+import { LayoutGrid, LogOut, Plus, Settings, Ticket } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { useMyCrews } from '../lib/crews'
@@ -44,6 +44,9 @@ function Sidebar() {
         </SideLink>
         <SideLink to="/join" icon={<Ticket className="size-4" />}>
           초대 코드로 참여
+        </SideLink>
+        <SideLink to="/settings" icon={<Settings className="size-4" />}>
+          설정
         </SideLink>
       </nav>
 

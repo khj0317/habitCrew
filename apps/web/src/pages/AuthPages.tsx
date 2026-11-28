@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Alert, Button, Field, Logo } from '../components/ui'
-import { ApiError } from '../lib/api'
+import { api, ApiError } from '../lib/api'
 import { useRedirectTarget } from '../lib/redirect'
 import { useAuth } from '../providers/authContext'
 
@@ -115,6 +115,11 @@ export function LoginPage() {
 
   return (
     <AuthLayout title={'다시 만나서 반가워요 👋'} subtitle="오늘의 인증, 크루가 기다리고 있어요.">
+      {(location.state as { passwordReset?: boolean } | null)?.passwordReset && (
+        <div className="mb-4 rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700" role="status">
+          비밀번호를 바꿨어요. 새 비밀번호로 로그인해 주세요.
+        </div>
+      )}
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <Field
           label="이메일"
@@ -134,6 +139,9 @@ export function LoginPage() {
           required
         />
         {error && <Alert>{error}</Alert>}
+        <Link to="/forgot-password" className="-mt-1 self-end text-sm text-stone-500 hover:text-stone-800 hover:underline">
+          비밀번호를 잊으셨나요?
+        </Link>
         <Button type="submit" loading={submitting} disabled={startingGuest} className="mt-2">
           로그인
         </Button>
@@ -245,6 +253,136 @@ export function SignupPage() {
           로그인
         </Link>
       </p>
+    </AuthLayout>
+  )
+}
+
+/** 비밀번호 찾기: 가입한 이메일로 재설정 링크를 보낸다 */
+export function ForgotPasswordPage() {
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setSubmitting(true)
+    try {
+      await api('/api/auth/password-reset/request', { method: 'POST', body: { email }, auth: false })
+      setSent(true)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : '요청하지 못했어요.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <AuthLayout title="비밀번호 찾기 🔑" subtitle="가입한 이메일로 비밀번호를 다시 정하는 링크를 보내 드려요.">
+      {sent ? (
+        <div className="flex flex-col gap-4">
+          <div className="rounded-2xl bg-brand-50 px-5 py-4 text-sm leading-relaxed text-brand-800" role="status">
+            <p className="font-semibold">메일을 확인해 주세요 📮</p>
+            <p className="mt-1">
+              {email}(으)로 가입돼 있다면 재설정 링크를 보냈어요. 링크는 30분 동안 한 번만 쓸 수 있어요. 메일이 안 보이면
+              스팸함도 확인해 주세요.
+            </p>
+          </div>
+          <Link to="/login" className="text-center text-sm font-semibold text-brand-700 hover:underline">
+            로그인으로 돌아가기
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+          <Field
+            label="이메일"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          {error && <Alert>{error}</Alert>}
+          <Button type="submit" loading={submitting} disabled={!email.trim()} className="mt-2">
+            재설정 링크 보내기
+          </Button>
+          <Link to="/login" className="text-center text-sm text-stone-500 hover:text-stone-800">
+            로그인으로 돌아가기
+          </Link>
+        </form>
+      )}
+    </AuthLayout>
+  )
+}
+
+/** 메일 속 링크로 들어와 새 비밀번호를 정한다 */
+export function ResetPasswordPage() {
+  const [params] = useSearchParams()
+  const navigate = useNavigate()
+  const token = params.get('token') ?? ''
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [fieldError, setFieldError] = useState<string | undefined>()
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setFieldError(undefined)
+    if (password !== confirm) {
+      setFieldError('두 비밀번호가 달라요.')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await api('/api/auth/password-reset/confirm', { method: 'POST', body: { token, newPassword: password }, auth: false })
+      navigate('/login', { replace: true, state: { passwordReset: true } })
+    } catch (err) {
+      if (err instanceof ApiError && err.fieldErrors.newPassword) setFieldError(err.fieldErrors.newPassword)
+      else setError(err instanceof ApiError ? err.message : '바꾸지 못했어요.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <AuthLayout title="새 비밀번호 정하기" subtitle="바꾸면 다른 기기에서는 모두 로그아웃돼요.">
+      {!token ? (
+        <Alert>링크가 올바르지 않아요. 메일의 링크를 다시 눌러 주세요.</Alert>
+      ) : (
+        <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+          <Field
+            label="새 비밀번호"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            hint="영문과 숫자를 섞어 8자 이상"
+            error={fieldError}
+          />
+          <Field
+            label="새 비밀번호 확인"
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+          {error && (
+            <Alert>
+              {error}{' '}
+              <Link to="/forgot-password" className="font-semibold underline">
+                다시 요청하기
+              </Link>
+            </Alert>
+          )}
+          <Button type="submit" loading={submitting} disabled={!password || !confirm} className="mt-2">
+            비밀번호 바꾸기
+          </Button>
+        </form>
+      )}
     </AuthLayout>
   )
 }

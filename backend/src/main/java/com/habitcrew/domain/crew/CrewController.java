@@ -3,6 +3,7 @@ package com.habitcrew.domain.crew;
 import com.habitcrew.domain.crew.dto.CrewRequests;
 import com.habitcrew.domain.crew.dto.CrewResponses;
 import com.habitcrew.global.security.LoginUserId;
+import com.habitcrew.global.web.RateLimited;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class CrewController {
 
     private final CrewService crewService;
 
+    @RateLimited(name = "crew-create", limit = 5)
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CrewResponses.Detail create(@LoginUserId Long userId, @Valid @RequestBody CrewRequests.Create request) {
@@ -52,6 +54,7 @@ public class CrewController {
         return crewService.preview(userId, inviteCode);
     }
 
+    @RateLimited(name = "crew-join", limit = 10)
     @PostMapping("/join")
     public CrewResponses.Detail join(@LoginUserId Long userId, @Valid @RequestBody CrewRequests.Join request) {
         return crewService.join(userId, request);

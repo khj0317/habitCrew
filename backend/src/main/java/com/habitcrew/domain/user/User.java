@@ -56,8 +56,41 @@ public class User {
         return user;
     }
 
+    /** 탈퇴한 시각. 탈퇴하면 이메일·닉네임·비밀번호를 지워 다시 로그인할 수 없게 한다 */
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    /** 내 인증에 댓글·좋아요가 달리면 알림 받기 */
+    @Column(name = "notify_activity", nullable = false)
+    private boolean notifyActivity = true;
+
     public boolean isGuest() {
         return guestExpiresAt != null;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void changePassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changeNotifyActivity(boolean notifyActivity) {
+        this.notifyActivity = notifyActivity;
+    }
+
+    /** 탈퇴: 개인정보를 지우고 같은 이메일로 다시 가입할 수 있게 비운다. 행은 지난 벌금 기록이 가리키므로 남긴다 */
+    public void anonymize(String unusablePasswordHash, Instant now) {
+        this.email = "deleted-" + id + "@deleted.habitcrew.local";
+        this.nickname = "탈퇴한사용자_" + id;
+        this.passwordHash = unusablePasswordHash;
+        this.notifyActivity = false;
+        this.deletedAt = now;
     }
 
     @PreUpdate

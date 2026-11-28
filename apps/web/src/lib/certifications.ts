@@ -144,3 +144,32 @@ export function useDeleteComment(crewId: number, id: number) {
     },
   })
 }
+
+export type ReportReason = 'SPAM' | 'INAPPROPRIATE' | 'UNRELATED' | 'OTHER'
+
+/** 신고·가리기는 사진 주소가 바뀌므로(가려지면 null) 피드와 상세를 다시 불러온다 */
+function useRefreshCertification(crewId: number) {
+  const queryClient = useQueryClient()
+  return (id: number) => {
+    queryClient.invalidateQueries({ queryKey: certKeys.detail(id) })
+    queryClient.invalidateQueries({ queryKey: certKeys.feed(crewId) })
+  }
+}
+
+export function useReport(crewId: number) {
+  const refresh = useRefreshCertification(crewId)
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: ReportReason }) =>
+      api<{ hidden: boolean }>(`/api/certifications/${id}/report`, { method: 'POST', body: { reason } }),
+    onSuccess: (_, { id }) => refresh(id),
+  })
+}
+
+export function useSetHidden(crewId: number) {
+  const refresh = useRefreshCertification(crewId)
+  return useMutation({
+    mutationFn: ({ id, hidden }: { id: number; hidden: boolean }) =>
+      api<{ hidden: boolean }>(`/api/certifications/${id}/hidden`, { method: 'PUT', body: { hidden } }),
+    onSuccess: (_, { id }) => refresh(id),
+  })
+}

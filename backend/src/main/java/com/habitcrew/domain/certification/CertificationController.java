@@ -6,6 +6,7 @@ import com.habitcrew.global.error.ErrorCode;
 import com.habitcrew.global.security.LoginUserId;
 import com.habitcrew.global.time.RequestTimeFilter;
 import com.habitcrew.global.time.ServiceTime;
+import com.habitcrew.global.web.RateLimited;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class CertificationController {
     private final CertificationService certificationService;
     private final ServiceTime serviceTime;
 
+    @RateLimited(name = "cert-upload", limit = 10)
     @PostMapping(value = "/api/crews/{crewId}/certifications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public CertificationDtos.Item create(@LoginUserId Long userId,
@@ -69,14 +71,31 @@ public class CertificationController {
         certificationService.delete(userId, certificationId);
     }
 
+    @RateLimited(name = "like", limit = 60)
     @PutMapping("/api/certifications/{certificationId}/like")
     public CertificationDtos.LikeResult like(@LoginUserId Long userId, @PathVariable Long certificationId) {
         return certificationService.like(userId, certificationId);
     }
 
+    @RateLimited(name = "like", limit = 60)
     @DeleteMapping("/api/certifications/{certificationId}/like")
     public CertificationDtos.LikeResult unlike(@LoginUserId Long userId, @PathVariable Long certificationId) {
         return certificationService.unlike(userId, certificationId);
+    }
+
+    /** 신고: 크루원 2명 또는 크루장이 신고하면 사진이 가려진다 */
+    @RateLimited(name = "report", limit = 10)
+    @PostMapping("/api/certifications/{certificationId}/report")
+    public CertificationDtos.HiddenResult report(@LoginUserId Long userId, @PathVariable Long certificationId,
+                                                 @Valid @RequestBody CertificationDtos.ReportRequest request) {
+        return certificationService.report(userId, certificationId, request.reason());
+    }
+
+    /** 크루장이 사진을 가리거나 다시 보이게 한다 */
+    @PutMapping("/api/certifications/{certificationId}/hidden")
+    public CertificationDtos.HiddenResult setHidden(@LoginUserId Long userId, @PathVariable Long certificationId,
+                                                    @Valid @RequestBody CertificationDtos.HiddenRequest request) {
+        return certificationService.setHidden(userId, certificationId, request.hidden());
     }
 
     @GetMapping("/api/certifications/{certificationId}/comments")
@@ -84,6 +103,7 @@ public class CertificationController {
         return certificationService.comments(userId, certificationId);
     }
 
+    @RateLimited(name = "comment", limit = 20)
     @PostMapping("/api/certifications/{certificationId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public CertificationDtos.Comment addComment(@LoginUserId Long userId, @PathVariable Long certificationId,

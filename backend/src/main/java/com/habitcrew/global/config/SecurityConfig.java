@@ -31,6 +31,8 @@ public class SecurityConfig {
             "/api/auth/signup",
             "/api/auth/login",
             "/api/auth/guest",
+            "/api/auth/password-reset/request",
+            "/api/auth/password-reset/confirm",
             "/api/auth/refresh",
             "/api/auth/logout"
     };

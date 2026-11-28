@@ -68,4 +68,26 @@ public interface CertificationRepository extends JpaRepository<Certification, Lo
 
     @Query(value = "select like_count from certifications where id = :id", nativeQuery = true)
     int likeCount(@Param("id") Long id);
+
+    // ---- 신고 ----
+
+    @Modifying
+    @Query(value = """
+            insert into certification_reports (certification_id, user_id, reason) values (:id, :userId, :reason)
+            on conflict do nothing
+            """, nativeQuery = true)
+    int insertReport(@Param("id") Long id, @Param("userId") Long userId, @Param("reason") String reason);
+
+    @Query(value = "select count(*) from certification_reports where certification_id = :id", nativeQuery = true)
+    int reportCount(@Param("id") Long id);
+
+    @Query(value = """
+            select certification_id from certification_reports
+            where user_id = :userId and certification_id in (:ids)
+            """, nativeQuery = true)
+    List<Long> findReportedIds(@Param("userId") Long userId, @Param("ids") Collection<Long> ids);
+
+    @Modifying
+    @Query(value = "update certifications set hidden = :hidden where id = :id", nativeQuery = true)
+    void setHidden(@Param("id") Long id, @Param("hidden") boolean hidden);
 }

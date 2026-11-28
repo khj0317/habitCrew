@@ -7,6 +7,8 @@ export type User = {
   guest: boolean
   /** 체험 계정이 사라지는 시각 */
   guestExpiresAt: string | null
+  /** 내 인증에 댓글·좋아요가 달리면 알림 */
+  notifyActivity: boolean
 }
 
 export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY'
@@ -63,8 +65,9 @@ export type Certification = {
   author: Author
   certDate: string
   message: string | null
-  imageUrl: string
-  thumbnailUrl: string
+  /** 신고로 가려진 사진이면 null (작성자·크루장에게는 보인다) */
+  imageUrl: string | null
+  thumbnailUrl: string | null
   imageWidth: number
   imageHeight: number
   likeCount: number
@@ -72,6 +75,8 @@ export type Certification = {
   commentCount: number
   mine: boolean
   createdAt: string
+  hidden: boolean
+  reportedByMe: boolean
 }
 
 export type Feed = { items: Certification[]; nextCursor: number | null }

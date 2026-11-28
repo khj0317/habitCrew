@@ -113,7 +113,7 @@ public class CertificationService {
                 return certification;
             });
             return readOnly.execute(status -> toItem(certificationRepository.findWithUser(saved.getId()).orElseThrow(),
-                    userId, false));
+                    userId, false, false, true));
         } catch (DataIntegrityViolationException e) {
             deletePhotos(imageKey, thumbnailKey);
             throw new BusinessException(ErrorCode.ALREADY_CERTIFIED);
@@ -125,22 +125,26 @@ public class CertificationService {
 
     @Transactional(readOnly = true)
     public CertificationDtos.Feed feed(Long userId, Long crewId, Long cursor) {
-        requireMember(crewId, userId);
+        boolean isOwner = requireMember(crewId, userId).getCrew().isOwner(userId);
         List<Certification> page = certificationRepository.findFeed(crewId, cursor, Limit.of(FEED_PAGE_SIZE + 1));
         boolean hasNext = page.size() > FEED_PAGE_SIZE;
         List<Certification> items = hasNext ? page.subList(0, FEED_PAGE_SIZE) : page;
 
         Set<Long> liked = items.isEmpty() ? Set.of() : new HashSet<>(certificationRepository.findLikedIds(userId,
                 items.stream().map(Certification::getId).toList()));
+        Set<Long> reported = items.isEmpty() ? Set.of() : new HashSet<>(certificationRepository.findReportedIds(userId,
+                items.stream().map(Certification::getId).toList()));
         return new CertificationDtos.Feed(
-                items.stream().map(c -> toItem(c, userId, liked.contains(c.getId()))).toList(),
+                items.stream().map(c -> toItem(c, userId, liked.contains(c.getId()), reported.contains(c.getId()), isOwner)).toList(),
                 hasNext ? items.getLast().getId() : null);
     }
 
     @Transactional(readOnly = true)
     public CertificationDtos.Item get(Long userId, Long certificationId) {
         Certification certification = requireAccess(certificationId, userId);
-        return toItem(certification, userId, certificationRepository.isLiked(certificationId, userId));
+        boolean isOwner = crewRepository.findById(certification.getCrewId()).map(c -> c.isOwner(userId)).orElse(false);
+        boolean reported = !certificationRepository.findReportedIds(userId, List.of(certificationId)).isEmpty();
+        return toItem(certification, userId, certificationRepository.isLiked(certificationId, userId), reported, isOwner);
     }
 
     /** 오늘의 인증 현황: 누가 인증했고 누가 아직인지 */
@@ -183,9 +187,11 @@ public class CertificationService {
     /** 좋아요 (PUT): 여러 번 보내도 결과가 같다. 실제로 새로 눌린 경우에만 개수를 올린다 */
     @Transactional
     public CertificationDtos.LikeResult like(Long userId, Long certificationId) {
-        requireAccess(certificationId, userId);
+        Certification certification = requireAccess(certificationId, userId);
         if (certificationRepository.insertLike(certificationId, userId) == 1) {
             certificationRepository.addLikeCount(certificationId, 1);
+            events.publishEvent(new ActivityEvent(ActivityEvent.Type.LIKE, certification.getCrewId(), certificationId,
+                    certification.getUser().getId(), userId, null));
         }
         return new CertificationDtos.LikeResult(true, certificationRepository.likeCount(certificationId));
     }
@@ -199,6 +205,43 @@ public class CertificationService {
         return new CertificationDtos.LikeResult(false, certificationRepository.likeCount(certificationId));
     }
 
+    /** 신고가 이만큼 쌓이면 사진을 가린다 (한 사람이 혼자 가릴 수는 없게 2명) */
+    static final int HIDE_THRESHOLD = 2;
+
+    /**
+     * 신고: 같은 사람은 한 번만. 크루원 2명이 신고하거나 크루장이 신고하면 사진을 가린다.
+     * 가려도 인증 기록과 정산은 그대로다 (지우는 것이 아니라 보이지 않게만).
+     */
+    @Transactional
+    public CertificationDtos.HiddenResult report(Long userId, Long certificationId, CertificationDtos.ReportReason reason) {
+        Certification certification = requireAccess(certificationId, userId);
+        if (certification.isAuthor(userId)) {
+            throw new BusinessException(ErrorCode.CANNOT_REPORT_OWN);
+        }
+        if (certificationRepository.insertReport(certificationId, userId, reason.name()) == 0) {
+            throw new BusinessException(ErrorCode.ALREADY_REPORTED);
+        }
+        boolean byOwner = crewRepository.findById(certification.getCrewId()).map(c -> c.isOwner(userId)).orElse(false);
+        boolean hide = certification.isHidden() || byOwner
+                || certificationRepository.reportCount(certificationId) >= HIDE_THRESHOLD;
+        if (hide && !certification.isHidden()) {
+            certificationRepository.setHidden(certificationId, true);
+        }
+        return new CertificationDtos.HiddenResult(hide);
+    }
+
+    /** 크루장이 사진을 가리거나 다시 보이게 한다 */
+    @Transactional
+    public CertificationDtos.HiddenResult setHidden(Long userId, Long certificationId, boolean hidden) {
+        Certification certification = requireAccess(certificationId, userId);
+        boolean isOwner = crewRepository.findById(certification.getCrewId()).map(c -> c.isOwner(userId)).orElse(false);
+        if (!isOwner) {
+            throw new BusinessException(ErrorCode.NOT_CREW_OWNER);
+        }
+        certificationRepository.setHidden(certificationId, hidden);
+        return new CertificationDtos.HiddenResult(hidden);
+    }
+
     @Transactional(readOnly = true)
     public List<CertificationDtos.Comment> comments(Long userId, Long certificationId) {
         requireAccess(certificationId, userId);
@@ -209,11 +252,14 @@ public class CertificationService {
 
     @Transactional
     public CertificationDtos.Comment addComment(Long userId, Long certificationId, String content) {
-        requireAccess(certificationId, userId);
+        Certification certification = requireAccess(certificationId, userId);
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         CertificationComment comment = commentRepository.save(
                 new CertificationComment(certificationId, user, content, serviceTime.now()));
         certificationRepository.addCommentCount(certificationId, 1);
+        String preview = content.length() > 60 ? content.substring(0, 60) + "…" : content;
+        events.publishEvent(new ActivityEvent(ActivityEvent.Type.COMMENT, certification.getCrewId(), certificationId,
+                certification.getUser().getId(), userId, preview));
         return toComment(comment, userId);
     }
 
@@ -242,21 +288,25 @@ public class CertificationService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.CERTIFICATION_NOT_FOUND));
     }
 
-    private CertificationDtos.Item toItem(Certification c, Long userId, boolean likedByMe) {
+    private CertificationDtos.Item toItem(Certification c, Long userId, boolean likedByMe, boolean reportedByMe,
+                                          boolean viewerIsCrewOwner) {
+        boolean showPhoto = !c.isHidden() || c.isAuthor(userId) || viewerIsCrewOwner;
         return new CertificationDtos.Item(
                 c.getId(),
                 new CertificationDtos.Author(c.getUser().getId(), c.getUser().getNickname()),
                 c.getCertDate(),
                 c.getMessage(),
-                photoStorage.url(c.getImageKey()),
-                photoStorage.url(c.getThumbnailKey()),
+                showPhoto ? photoStorage.url(c.getImageKey()) : null,
+                showPhoto ? photoStorage.url(c.getThumbnailKey()) : null,
                 c.getImageWidth(),
                 c.getImageHeight(),
                 c.getLikeCount(),
                 likedByMe,
                 c.getCommentCount(),
                 c.isAuthor(userId),
-                c.getCreatedAt());
+                c.getCreatedAt(),
+                c.isHidden(),
+                reportedByMe);
     }
 
     private static CertificationDtos.Comment toComment(CertificationComment c, Long userId) {

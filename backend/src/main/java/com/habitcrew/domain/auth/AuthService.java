@@ -3,6 +3,7 @@ package com.habitcrew.domain.auth;
 import com.habitcrew.domain.auth.dto.LoginRequest;
 import com.habitcrew.domain.auth.dto.SignupRequest;
 import com.habitcrew.domain.auth.dto.TokenResponse;
+import com.habitcrew.domain.user.Nicknames;
 import com.habitcrew.domain.user.User;
 import com.habitcrew.domain.user.UserRepository;
 import com.habitcrew.domain.user.UserResponse;
@@ -39,6 +40,7 @@ public class AuthService {
         if (userRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
+        Nicknames.checkNotReserved(nickname);
         if (userRepository.existsByNickname(nickname)) {
             throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
         }
@@ -70,6 +72,7 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
         User user = userRepository.findById(userId)
                 .filter(u -> !u.isGuest() || u.getGuestExpiresAt().isAfter(clock.instant())) // 만료된 체험 계정
+                .filter(u -> !u.isDeleted())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
         return issue(user);
     }

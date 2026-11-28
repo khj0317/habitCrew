@@ -1,4 +1,7 @@
 # ./gradlew bootRun (local 프로필) 전용 설정
 habitcrew:
+  # 로컬에서 E2E 테스트를 여러 번 돌려도 막히지 않게 (배포는 10)
+  guest:
+    max-per-ip-per-hour: 100
   auth:
     cookie-secure: false

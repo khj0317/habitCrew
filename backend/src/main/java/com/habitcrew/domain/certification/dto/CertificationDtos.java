@@ -28,7 +28,10 @@ public final class CertificationDtos {
             boolean likedByMe,
             int commentCount,
             boolean mine,
-            Instant createdAt
+            Instant createdAt,
+            // 신고로 가려진 사진: 크루원에게는 사진 주소를 주지 않는다 (작성자와 크루장은 판단을 위해 볼 수 있다)
+            boolean hidden,
+            boolean reportedByMe
     ) {
     }
 
@@ -52,6 +55,18 @@ public final class CertificationDtos {
     }
 
     public record LikeResult(boolean liked, int likeCount) {
+    }
+
+    public enum ReportReason { SPAM, INAPPROPRIATE, UNRELATED, OTHER }
+
+    public record ReportRequest(@jakarta.validation.constraints.NotNull(message = "신고 이유를 골라 주세요.") ReportReason reason) {
+    }
+
+    public record HiddenRequest(@jakarta.validation.constraints.NotNull Boolean hidden) {
+    }
+
+    /** 신고·가리기 결과: 지금 가려졌는지 */
+    public record HiddenResult(boolean hidden) {
     }
 
     public record Comment(Long id, Author author, String content, boolean mine, Instant createdAt) {

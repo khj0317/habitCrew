@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Heart, Send, Trash2 } from 'lucide-react'
+import { EyeOff, Flag, Heart, Send, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Alert, Avatar, Button, ConfirmDialog, ErrorState, PageHeader } from '../components/ui'
@@ -10,9 +10,13 @@ import {
   useComments,
   useDeleteCertification,
   useDeleteComment,
+  useReport,
+  useSetHidden,
   useToday,
   useToggleLike,
+  type ReportReason,
 } from '../lib/certifications'
+import { useCrew } from '../lib/crews'
 import { formatRelative } from '../lib/format'
 
 /** 인증 하나를 크게 보고 댓글을 단다 */
@@ -27,6 +31,8 @@ export function CertificationPage() {
   const remove = useDeleteCertification(crewId)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { data: crew } = useCrew(crewId)
+  const [reportOpen, setReportOpen] = useState(false)
 
   if (isPending) {
     return (
@@ -54,27 +60,56 @@ export function CertificationPage() {
         back={`/crews/${crewId}`}
         title={`${c.author.nickname}님의 인증`}
         right={
-          canDelete && (
-            <button
-              onClick={() => setConfirmDelete(true)}
-              aria-label="인증 지우기"
-              className="flex size-10 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-red-600"
-            >
-              <Trash2 className="size-5" />
-            </button>
-          )
+          <div className="flex items-center">
+            {!c.mine && !c.reportedByMe && (
+              <button
+                onClick={() => setReportOpen(true)}
+                aria-label="신고하기"
+                title="신고하기"
+                className="flex size-10 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-red-600"
+              >
+                <Flag className="size-5" />
+              </button>
+            )}
+            {canDelete && (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                aria-label="인증 지우기"
+                className="flex size-10 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-red-600"
+              >
+                <Trash2 className="size-5" />
+              </button>
+            )}
+          </div>
         }
       />
 
       {/* 넓은 화면(1280px~): 왼쪽 사진, 오른쪽 내용·댓글 */}
       <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start xl:gap-8">
+      <div>
       <div className="bg-stone-900 lg:overflow-hidden lg:rounded-3xl">
-        <img
-          src={c.imageUrl}
-          alt={`${c.author.nickname}님의 인증 사진`}
-          style={{ aspectRatio: `${c.imageWidth} / ${c.imageHeight}` }}
-          className="mx-auto max-h-[70vh] w-full object-contain"
-        />
+        {c.imageUrl ? (
+          <img
+            src={c.imageUrl}
+            alt={`${c.author.nickname}님의 인증 사진`}
+            style={{ aspectRatio: `${c.imageWidth} / ${c.imageHeight}` }}
+            className="mx-auto max-h-[70vh] w-full object-contain"
+          />
+        ) : (
+          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 bg-stone-100 text-stone-500">
+            <span className="text-4xl" aria-hidden>
+              🙈
+            </span>
+            <span>신고로 가려진 사진이에요</span>
+          </div>
+        )}
+      </div>
+      {c.hidden && (c.mine || crew?.myRole === 'OWNER') && (
+        <HiddenNotice crewId={crewId} id={c.id} isOwner={crew?.myRole === 'OWNER'} />
+      )}
+      {c.reportedByMe && !c.hidden && (
+        <p className="mt-3 px-5 text-sm text-stone-500 lg:px-0">신고한 인증이에요. 크루원 2명이 신고하면 사진이 가려져요.</p>
+      )}
       </div>
 
       <div className="lg:rounded-3xl lg:border lg:border-stone-200 lg:bg-white lg:pb-5">
@@ -108,6 +143,8 @@ export function CertificationPage() {
       <Comments crewId={crewId} certificationId={id} count={c.commentCount} />
       </div>
       </div>
+
+      <ReportDialog crewId={crewId} id={c.id} open={reportOpen} onClose={() => setReportOpen(false)} />
 
       <ConfirmDialog
         open={confirmDelete}
@@ -223,5 +260,81 @@ function Comments({ crewId, certificationId, count }: { crewId: number; certific
         </Button>
       </form>
     </section>
+  )
+}
+
+const REASONS: { value: ReportReason; label: string }[] = [
+  { value: 'INAPPROPRIATE', label: '부적절한 사진이에요' },
+  { value: 'UNRELATED', label: '인증과 관계없는 사진이에요' },
+  { value: 'SPAM', label: '광고·도배예요' },
+  { value: 'OTHER', label: '기타' },
+]
+
+/** 신고: 크루원 2명이 신고하거나 크루장이 신고하면 사진이 가려진다 */
+function ReportDialog({ crewId, id, open, onClose }: { crewId: number; id: number; open: boolean; onClose: () => void }) {
+  const report = useReport(crewId)
+  const [reason, setReason] = useState<ReportReason>('INAPPROPRIATE')
+  const [error, setError] = useState<string | null>(null)
+
+  return (
+    <ConfirmDialog
+      open={open}
+      title="이 인증을 신고할까요?"
+      description={
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2">크루원 2명이 신고하면 사진이 가려져요. 신고한 사람은 알려지지 않아요.</legend>
+          {REASONS.map((r) => (
+            <label key={r.value} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-stone-50">
+              <input
+                type="radio"
+                name="report-reason"
+                value={r.value}
+                checked={reason === r.value}
+                onChange={() => setReason(r.value)}
+                className="accent-red-600"
+              />
+              <span className="text-stone-700">{r.label}</span>
+            </label>
+          ))}
+        </fieldset>
+      }
+      confirmLabel="신고하기"
+      danger
+      loading={report.isPending}
+      error={error}
+      onClose={() => {
+        setError(null)
+        onClose()
+      }}
+      onConfirm={async () => {
+        try {
+          await report.mutateAsync({ id, reason })
+          onClose()
+        } catch (err) {
+          setError(err instanceof ApiError ? err.message : '신고하지 못했어요.')
+        }
+      }}
+    />
+  )
+}
+
+/** 가려진 사진: 작성자와 크루장에게만 보이고, 크루장은 다시 보이게 할 수 있다 */
+function HiddenNotice({ crewId, id, isOwner }: { crewId: number; id: number; isOwner: boolean }) {
+  const setHidden = useSetHidden(crewId)
+  return (
+    <div className="mx-5 mt-3 flex items-center gap-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800 lg:mx-0">
+      <EyeOff className="size-4 shrink-0" aria-hidden />
+      <p className="flex-1">신고로 가려진 사진이에요. 크루원에게는 보이지 않아요.</p>
+      {isOwner && (
+        <Button
+          variant="secondary"
+          className="!h-9 !px-3 !text-xs"
+          loading={setHidden.isPending}
+          onClick={() => setHidden.mutate({ id, hidden: false })}
+        >
+          다시 보이기
+        </Button>
+      )}
+    </div>
   )
 }

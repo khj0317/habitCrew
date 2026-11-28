@@ -33,9 +33,10 @@ export function uniqueSuffix() {
   return Math.random().toString(36).slice(2, 8)
 }
 
-export async function signup(page: Page, nickname: string) {
+/** 이메일은 ASCII여야 하므로 닉네임과 따로 받는다 (기본: 무작위) */
+export async function signup(page: Page, nickname: string, email = `e2e-${uniqueSuffix()}${uniqueSuffix()}@example.com`) {
   await page.goto('/signup')
-  await page.getByLabel('이메일').fill(`e2e-${nickname}@example.com`)
+  await page.getByLabel('이메일').fill(email)
   await page.getByLabel('비밀번호').fill('Password1')
   await page.getByLabel('닉네임').fill(nickname)
   await page.getByRole('button', { name: '가입하고 시작하기' }).click()

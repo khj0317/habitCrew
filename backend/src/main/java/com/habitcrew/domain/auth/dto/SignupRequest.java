@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 public record SignupRequest(
         @NotBlank(message = "이메일을 입력해 주세요.")
         @Email(message = "이메일 형식이 올바르지 않습니다.")
+        // 대부분의 메일 서버는 한글 등 ASCII가 아닌 주소를 받지 않아, 비밀번호 찾기 메일을 보낼 수 없게 된다
+        @Pattern(regexp = "^[!-~]+$", message = "이메일은 영문·숫자·기호로 입력해 주세요.")
         @Size(max = 255)
         String email,
 

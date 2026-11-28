@@ -9,9 +9,13 @@ export class ApiError extends Error {
   readonly status: number
   readonly code: string
   readonly fieldErrors: Record<string, string>
+  /** 서버 로그에서 이 요청을 찾는 ID (문의할 때 알려 주면 된다) */
+  readonly requestId?: string
 
-  constructor(status: number, code: string, message: string, fieldErrors: Record<string, string> = {}) {
-    super(message)
+  constructor(status: number, code: string, message: string, fieldErrors: Record<string, string> = {}, requestId?: string) {
+    // 서버 오류는 요청 ID를 함께 보여 줘서 문의할 때 쓸 수 있게 한다
+    super(status >= 500 && requestId ? `${message} (오류 ID: ${requestId})` : message)
+    this.requestId = requestId
     this.status = status
     this.code = code
     this.fieldErrors = fieldErrors
@@ -88,8 +92,9 @@ export async function api<T>(path: string, { method = 'GET', body, auth = true }
   }
 
   if (!res.ok) throw await toError(res)
-  if (res.status === 204) return undefined as T
-  return (await res.json()) as T
+  // 본문이 없는 응답(204 No Content, 202 Accepted 등)은 JSON으로 읽지 않는다
+  const text = await res.text()
+  return (text ? JSON.parse(text) : undefined) as T
 }
 
 async function toError(res: Response): Promise<ApiError> {
@@ -99,7 +104,8 @@ async function toError(res: Response): Promise<ApiError> {
     for (const e of data.errors ?? []) {
       fieldErrors[e.field] ??= e.reason
     }
-    return new ApiError(res.status, data.code ?? 'UNKNOWN', data.message ?? '요청을 처리하지 못했어요.', fieldErrors)
+    return new ApiError(res.status, data.code ?? 'UNKNOWN', data.message ?? '요청을 처리하지 못했어요.', fieldErrors,
+      data.requestId ?? res.headers.get('X-Request-Id') ?? undefined)
   } catch {
     return new ApiError(res.status, 'UNKNOWN', '요청을 처리하지 못했어요.')
   }

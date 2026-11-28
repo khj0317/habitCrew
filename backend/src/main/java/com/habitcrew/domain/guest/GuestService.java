@@ -41,7 +41,7 @@ import java.util.Set;
  *       그래서 방문자마다 자기만의 모래상자를 준다.</li>
  *   <li>크루원 3명(가상 인물)과 14일치 인증·좋아요·댓글을 넣고, 실제 정산 로직으로 지난 날짜를 정산해
  *       랭킹·달력·연속 인증·벌금이 처음부터 다 보이게 한다. 오늘 인증은 비워 두어 직접 올려 볼 수 있다.</li>
- *   <li>24시간 뒤 정리 작업이 통째로 지운다. 같은 IP에서 1시간에 10개까지만 만들 수 있다 (남용 방지).</li>
+ *   <li>24시간 뒤 정리 작업이 통째로 지운다. 같은 IP에서 1시간에 10개까지만(설정 가능) 만들 수 있다 (남용 방지).</li>
  * </ul>
  */
 @Service
@@ -49,7 +49,6 @@ public class GuestService {
 
     static final Duration LIFETIME = Duration.ofHours(24);
     static final int HISTORY_DAYS = 14;
-    private static final int MAX_PER_IP_PER_HOUR = 10;
     private static final String GUEST_DOMAIN = "@guest.habitcrew.local";
 
     private static final List<String> MESSAGES = List.of(
@@ -79,6 +78,7 @@ public class GuestService {
     private final ServiceTime serviceTime;
     private final TransactionTemplate transaction;
     private final boolean limitEnabled;
+    private final int maxPerIpPerHour;
     private final SecureRandom random = new SecureRandom();
 
     public GuestService(UserRepository userRepository, CrewRepository crewRepository,
@@ -86,7 +86,9 @@ public class GuestService {
                         SettlementService settlementService, SamplePhotos samplePhotos,
                         PasswordEncoder passwordEncoder, StringRedisTemplate redis, JdbcTemplate jdbc,
                         ServiceTime serviceTime, PlatformTransactionManager transactionManager,
-                        @Value("${habitcrew.guest.rate-limit-enabled:true}") boolean limitEnabled) {
+                        @Value("${habitcrew.guest.rate-limit-enabled:true}") boolean limitEnabled,
+                        @Value("${habitcrew.guest.max-per-ip-per-hour:10}") int maxPerIpPerHour) {
+        this.maxPerIpPerHour = maxPerIpPerHour;
         this.userRepository = userRepository;
         this.crewRepository = crewRepository;
         this.memberRepository = memberRepository;
@@ -195,7 +197,7 @@ public class GuestService {
         if (count != null && count == 1) {
             redis.expire(key, Duration.ofHours(1));
         }
-        if (count != null && count > MAX_PER_IP_PER_HOUR) {
+        if (count != null && count > maxPerIpPerHour) {
             throw new BusinessException(ErrorCode.GUEST_LIMIT);
         }
     }

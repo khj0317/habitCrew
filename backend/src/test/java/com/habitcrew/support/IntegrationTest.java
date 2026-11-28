@@ -72,6 +72,13 @@ public @interface IntegrationTest {
             return new QueryCounter();
         }
 
+        /** 테스트에서는 실제로 메일을 보내지 않는다 */
+        @Bean
+        @Primary
+        RecordingMailer recordingMailer() {
+            return new RecordingMailer();
+        }
+
         /** 테스트에서는 실제 푸시 서버로 보내지 않는다 */
         @Bean
         @Primary

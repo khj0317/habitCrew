@@ -1,4 +1,4 @@
-import { CalendarDays, Crown, LogOut, Plus, Ticket, Users } from 'lucide-react'
+import { CalendarDays, Crown, LogOut, Plus, Settings, Ticket, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { GuestBanner } from '../components/GuestBanner'
 import { PushCard } from '../components/PushCard'
@@ -16,6 +16,14 @@ export function HomePage() {
     <div className="page-wide flex flex-col">
       <header className="flex items-center justify-between px-5 py-4 lg:hidden">
         <Logo className="text-stone-900" />
+        <div className="flex items-center gap-1">
+        <Link
+          to="/settings"
+          aria-label="설정"
+          className="flex size-9 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-100"
+        >
+          <Settings className="size-4" />
+        </Link>
         <button
           onClick={logout}
           className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-stone-500 hover:bg-stone-100"
@@ -23,6 +31,7 @@ export function HomePage() {
           <LogOut className="size-4" aria-hidden />
           로그아웃
         </button>
+        </div>
       </header>
 
       <main className="flex flex-1 flex-col px-5 pb-10 lg:px-0">

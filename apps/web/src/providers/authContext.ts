@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { User } from '../lib/types'
+import type { TokenResponse, User } from '../lib/types'
 
 export type AuthState = {
   user: User | null
@@ -9,6 +9,10 @@ export type AuthState = {
   signup: (email: string, password: string, nickname: string) => Promise<void>
   /** 로그인 없이 둘러보기: 체험 계정을 만들어 바로 로그인한다 */
   startGuest: () => Promise<void>
+  /** 닉네임·알림 설정을 바꾼 뒤 화면의 사용자 정보를 바꾼다 */
+  updateUser: (user: User) => void
+  /** 비밀번호를 바꾸면 서버가 새 토큰을 준다 */
+  applySession: (session: TokenResponse) => void
   logout: () => Promise<void>
 }
 

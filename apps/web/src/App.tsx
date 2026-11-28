@@ -2,13 +2,14 @@ import type { ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router'
 import { AppShell } from './components/AppShell'
 import { FullScreenSpinner } from './components/ui'
-import { LoginPage, SignupPage } from './pages/AuthPages'
+import { ForgotPasswordPage, LoginPage, ResetPasswordPage, SignupPage } from './pages/AuthPages'
 import { CertificationPage } from './pages/CertificationPage'
 import { CertifyPage } from './pages/CertifyPage'
 import { CreateCrewPage, EditCrewPage } from './pages/CrewFormPages'
 import { CrewDetailPage } from './pages/CrewDetailPage'
 import { HomePage } from './pages/HomePage'
 import { JoinCrewPage } from './pages/JoinCrewPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { SettlementsPage } from './pages/SettlementsPage'
 import { useAuth } from './providers/authContext'
 import { useRedirectTarget } from './lib/redirect'
@@ -55,6 +56,10 @@ export function App() {
       <Route path="/join/:code" element={authed(<JoinCrewPage />)} />
       <Route path="/login" element={guest(<LoginPage />)} />
       <Route path="/signup" element={guest(<SignupPage />)} />
+      <Route path="/forgot-password" element={guest(<ForgotPasswordPage />)} />
+      {/* 메일 링크는 로그인 상태와 상관없이 열린다 */}
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/settings" element={authed(<SettingsPage />)} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

@@ -13,6 +13,7 @@ public enum ErrorCode {
     NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "요청이 현재 상태와 충돌합니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
+    TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS, "요청이 너무 잦아요. 잠시 후 다시 시도해 주세요."),
 
     // 인증
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
@@ -52,9 +53,18 @@ public enum ErrorCode {
     PAST_CERTIFICATION(HttpStatus.CONFLICT, "지난 날짜의 인증은 지울 수 없어요. 이미 정산에 반영됐어요."),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없어요."),
     NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "내 댓글만 지울 수 있어요."),
+    CANNOT_REPORT_OWN(HttpStatus.BAD_REQUEST, "내 인증은 신고할 수 없어요."),
+    ALREADY_REPORTED(HttpStatus.CONFLICT, "이미 신고한 인증이에요."),
+
+    // 계정
+    RESERVED_NICKNAME(HttpStatus.BAD_REQUEST, "'체험러'·'탈퇴한사용자'로 시작하는 닉네임은 쓸 수 없어요."),
+    INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호가 올바르지 않아요."),
+    INVALID_RESET_TOKEN(HttpStatus.BAD_REQUEST, "링크가 만료됐거나 이미 사용한 링크예요. 비밀번호 찾기를 다시 해 주세요."),
+    OWNER_OF_ACTIVE_CREWS(HttpStatus.CONFLICT, "크루원이 남아 있는 크루의 크루장이에요. 크루장을 넘긴 뒤에 탈퇴할 수 있어요."),
 
     // 체험 계정
     GUEST_RESTRICTED(HttpStatus.FORBIDDEN, "체험 계정에서는 다른 크루에 참여할 수 없어요. 회원가입 후 이용해 주세요."),
+    GUEST_ACCOUNT_READONLY(HttpStatus.FORBIDDEN, "체험 계정은 계정 정보를 바꿀 수 없어요. 24시간 뒤 자동으로 사라져요."),
     GUEST_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "체험 계정을 너무 많이 만들었어요. 잠시 후 다시 시도해 주세요."),
 
     // 알림
