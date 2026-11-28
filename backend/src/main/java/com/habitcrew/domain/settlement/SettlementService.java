@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.Instant;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +113,22 @@ public class SettlementService {
                 on conflict do nothing
                 """, params);
 
+        // 2-1) 벌금 받은 사람의 알림함에 남긴다 (같은 문장 안에서 한 번에)
+        if (penalized > 0) {
+            jdbc.update("""
+                    insert into notifications (user_id, type, title, body, url, created_at)
+                    select p.user_id, 'PENALTY', '벌금 ' || to_char(p.points, 'FM999,999,999') || 'P',
+                           left(c.name, 40) || ' · ' || :dateLabel || ' 인증을 놓쳤어요',
+                           '/crews/' || c.id || '/settlements', :notifiedAt
+                    from penalties p join crews c on c.id = p.crew_id
+                    where p.crew_id = :crewId and p.settle_date = :date
+                    """, new MapSqlParameterSource(params.getValues())
+                    .addValue("dateLabel", date.getMonthValue() + "월 " + date.getDayOfMonth() + "일")
+                    // 늦게 따라잡아 정산해도 알림 시각은 그날 정산 시각(다음 날 0시 5분)으로 보이게
+                    .addValue("notifiedAt", Timestamp.from(earliest(serviceTime.now(),
+                            serviceTime.deadlineOf(date).plus(Duration.ofMinutes(5))))));
+        }
+
         // 3) 결과 숫자를 기록해 둔다 (정산 내역 화면용)
         jdbc.update("""
                 update crew_settlements set
@@ -127,5 +145,9 @@ public class SettlementService {
 
         log.info("정산 완료: crew={} date={} 벌금 {}명", crewId, date, penalized);
         return true;
+    }
+
+    private static Instant earliest(Instant a, Instant b) {
+        return a.isBefore(b) ? a : b;
     }
 }

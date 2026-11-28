@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { useMyCrews } from '../lib/crews'
 import { useAuth } from '../providers/authContext'
+import { NotificationBell } from './NotificationBell'
 import { Avatar, Logo } from './ui'
 
 /**
@@ -49,6 +50,7 @@ function TopNav() {
 
         {user && (
           <div className="ml-auto flex items-center gap-3">
+            <NotificationBell />
             <Avatar userId={user.id} nickname={user.nickname} size="sm" />
             <div className="leading-tight">
               <p className="text-sm font-extrabold">{user.nickname}</p>

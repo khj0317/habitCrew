@@ -46,4 +46,17 @@ test('로그인 없이 둘러보기 → 사진 인증 → 좋아요·댓글 → 
   await expect(page.getByRole('heading', { name: '인증 달력' })).toBeVisible()
   await expect(page.getByText('🔥 5일 연속').first()).toBeVisible() // 4일 연속 + 오늘 인증
   await capture(page, '07-records')
+
+  // 7) 알림함: 크루원이 남긴 좋아요·댓글과 벌금 소식. 열면 배지가 사라진다
+  await page.goto('/')
+  const bell = page.getByRole('button', { name: /알림 \d+개 안 읽음/ })
+  await bell.click()
+  const panel = page.getByRole('dialog', { name: '알림' })
+  await expect(panel.getByText('새 댓글').first()).toBeVisible()
+  await expect(panel.getByText('벌금 1,000P').first()).toBeVisible()
+  await expect(page.getByTestId('notification-badge')).toHaveCount(0)
+  await capture(page, '08-notifications')
+  // 알림을 누르면 해당 화면으로
+  await panel.getByText('좋아요를 받았어요').click()
+  await expect(page).toHaveURL(/\/certifications\/\d+$/)
 })

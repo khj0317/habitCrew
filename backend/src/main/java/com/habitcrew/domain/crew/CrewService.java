@@ -4,6 +4,7 @@ import com.habitcrew.domain.certification.CertificationPhotos;
 import com.habitcrew.domain.crew.CrewMember.Role;
 import com.habitcrew.domain.crew.dto.CrewRequests;
 import com.habitcrew.domain.crew.dto.CrewResponses;
+import com.habitcrew.domain.notification.NotificationService;
 import com.habitcrew.domain.user.User;
 import com.habitcrew.domain.user.UserRepository;
 import com.habitcrew.global.error.BusinessException;
@@ -29,6 +30,7 @@ public class CrewService {
     private final UserRepository userRepository;
     private final InviteCodeGenerator inviteCodeGenerator;
     private final CertificationPhotos certificationPhotos;
+    private final NotificationService notificationService;
     private final Clock clock;
 
     @Transactional
@@ -112,6 +114,8 @@ public class CrewService {
         checkCrewLimit(userId);
 
         memberRepository.saveAndFlush(new CrewMember(crew, user, Role.MEMBER, clock.instant()));
+        notificationService.create(crew.getOwnerId(), NotificationService.Type.MEMBER_JOINED, "새 크루원",
+                user.getNickname() + "님이 " + crew.getName() + "에 참여했어요", "/crews/" + crew.getId());
         return detail(userId, crew.getId());
     }
 

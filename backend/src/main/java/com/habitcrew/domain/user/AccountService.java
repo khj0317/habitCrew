@@ -210,6 +210,7 @@ public class AccountService {
         jdbc.update("delete from certifications where user_id = ?", userId);
         jdbc.update("delete from crew_members where user_id = ?", userId);
         jdbc.update("delete from push_subscriptions where user_id = ?", userId);
+        jdbc.update("delete from notifications where user_id = ?", userId);
 
         // 3) 개인정보 지우기 + 모든 기기 로그아웃
         byte[] unusable = new byte[24];

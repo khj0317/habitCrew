@@ -94,6 +94,11 @@ class GuestTest extends ApiTestSupport {
         assertThat(feed.get("nextCursor").isNull()).isFalse();
         assertThat(json(perform(get("/api/crews/" + crewId + "/settlements"), guest)).get("items").size()).isEqualTo(13);
         assertThat(json(perform(get("/api/crews/" + crewId + "/ranking"), guest)).get("entries").size()).isEqualTo(4);
+        // 알림함: 좋아요·댓글이 위에, 그 아래 빼먹은 이틀의 벌금
+        JsonNode inbox = json(perform(get("/api/notifications"), guest));
+        assertThat(inbox.get("unreadCount").asInt()).isEqualTo(5);
+        assertThat(inbox.get("items").findValuesAsString("type"))
+                .containsExactly("COMMENT", "COMMENT", "LIKE", "PENALTY", "PENALTY");
         // 샘플 사진도 서명된 주소로 열린다
         assertThat(fetch(feed.get("items").get(0).get("thumbnailUrl").asString())).isEqualTo(200);
     }

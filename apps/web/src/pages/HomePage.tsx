@@ -1,6 +1,7 @@
 import { CalendarDays, Crown, LogOut, Plus, Settings, Ticket, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { GuestBanner } from '../components/GuestBanner'
+import { NotificationBell } from '../components/NotificationBell'
 import { PushCard } from '../components/PushCard'
 import { Button, ErrorState, Logo } from '../components/ui'
 import { useMyCrews } from '../lib/crews'
@@ -17,6 +18,7 @@ export function HomePage() {
       <header className="flex items-center justify-between px-5 py-4 lg:hidden">
         <Logo className="text-stone-900" />
         <div className="flex items-center gap-1">
+        <NotificationBell />
         <Link
           to="/settings"
           aria-label="설정"

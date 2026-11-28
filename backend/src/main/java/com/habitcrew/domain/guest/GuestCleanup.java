@@ -51,8 +51,8 @@ public class GuestCleanup {
         // 2) 체험 크루를 지우면 크루원·인증·좋아요·댓글·정산·벌금이 함께 지워진다 (ON DELETE CASCADE)
         jdbc.update("delete from crews where owner_id in (" + expired + ")", now);
         // 3) 혹시 남은 흔적 (체험 계정이 만든 다른 크루의 기록 등)
-        for (String table : List.of("certification_likes", "certification_comments", "penalties", "crew_members",
-                "certifications")) {
+        for (String table : List.of("certification_likes", "certification_comments", "certification_reports",
+                "penalties", "crew_members", "certifications", "notifications")) {
             jdbc.update("delete from " + table + " where user_id in (" + expired + ")", now);
         }
         // 4) 계정 (푸시 구독·알림 기록은 ON DELETE CASCADE)

@@ -50,10 +50,10 @@ function BrandPanel() {
         HabitCrew
       </span>
       <div className="relative my-auto max-w-md">
-        <h2 className="text-5xl leading-tight font-black">
+        <h2 className="text-4xl leading-tight font-black break-keep xl:text-5xl">
           혼자서는 사흘,
           <br />
-          크루와 함께라면 <span className="bg-lime-400 px-1 text-ink">오래.</span>
+          크루와 함께라면 <span className="bg-lime-400 px-1 whitespace-nowrap text-ink">오래.</span>
         </h2>
         <p className="mt-4 text-lg text-white/80">친구들과 매일 인증하며 습관을 만드는 서비스예요.</p>
         <ul className="mt-10 flex flex-col gap-5">

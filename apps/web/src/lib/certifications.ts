@@ -33,6 +33,8 @@ export function useCertification(id: number) {
   return useQuery({
     queryKey: certKeys.detail(id),
     queryFn: () => api<Certification>(`/api/certifications/${id}`),
+    // 사진 주소(서명 URL)는 1시간 뒤 만료되므로 오래 열어 둬도 사진이 깨지지 않게 다시 받아 온다
+    refetchInterval: 50 * 60_000,
   })
 }
 

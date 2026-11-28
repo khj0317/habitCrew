@@ -1,5 +1,6 @@
 package com.habitcrew.domain.settlement;
 
+import com.habitcrew.domain.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,11 +21,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class SettlementScheduler {
 
     private final SettlementRunner runner;
+    private final NotificationService notificationService;
 
     /** 매일 00:05 (KST). 자정 직전에 올라온 업로드가 끝날 시간을 조금 둔다 */
     @Scheduled(cron = "${habitcrew.settlement.cron}", zone = "${habitcrew.zone}")
     public void daily() {
         run("정기 정산");
+        try {
+            int removed = notificationService.deleteOld();
+            if (removed > 0) {
+                log.info("오래된 알림 {}개를 정리했습니다", removed);
+            }
+        } catch (RuntimeException e) {
+            log.error("오래된 알림 정리 실패", e);
+        }
     }
 
     /** 서버가 꺼져 있던 동안 놓친 정산을 서버가 뜨자마자 따라잡는다 */

@@ -5,6 +5,7 @@ import com.habitcrew.domain.crew.CrewMember;
 import com.habitcrew.domain.crew.CrewMemberRepository;
 import com.habitcrew.domain.crew.CrewRepository;
 import com.habitcrew.domain.crew.InviteCodeGenerator;
+import com.habitcrew.domain.notification.NotificationService;
 import com.habitcrew.domain.settlement.SettlementService;
 import com.habitcrew.domain.user.User;
 import com.habitcrew.domain.user.UserRepository;
@@ -71,6 +72,7 @@ public class GuestService {
     private final CrewMemberRepository memberRepository;
     private final InviteCodeGenerator inviteCodeGenerator;
     private final SettlementService settlementService;
+    private final NotificationService notificationService;
     private final SamplePhotos samplePhotos;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redis;
@@ -83,7 +85,8 @@ public class GuestService {
 
     public GuestService(UserRepository userRepository, CrewRepository crewRepository,
                         CrewMemberRepository memberRepository, InviteCodeGenerator inviteCodeGenerator,
-                        SettlementService settlementService, SamplePhotos samplePhotos,
+                        SettlementService settlementService, NotificationService notificationService,
+                        SamplePhotos samplePhotos,
                         PasswordEncoder passwordEncoder, StringRedisTemplate redis, JdbcTemplate jdbc,
                         ServiceTime serviceTime, PlatformTransactionManager transactionManager,
                         @Value("${habitcrew.guest.rate-limit-enabled:true}") boolean limitEnabled,
@@ -94,6 +97,7 @@ public class GuestService {
         this.memberRepository = memberRepository;
         this.inviteCodeGenerator = inviteCodeGenerator;
         this.settlementService = settlementService;
+        this.notificationService = notificationService;
         this.samplePhotos = samplePhotos;
         this.passwordEncoder = passwordEncoder;
         this.redis = redis;
@@ -143,14 +147,15 @@ public class GuestService {
                     }
                 }
             }
-            addReactions(guestCertIds, bots);
-            return new Long[]{guest.getId(), crew.getId()};
+            Long reacted = addReactions(guestCertIds, bots);
+            return new Long[]{guest.getId(), crew.getId(), reacted};
         });
 
         // 지난 날짜는 실제 정산 로직으로 정산한다 (벌금·정산 내역이 진짜 규칙대로 쌓인다)
         for (int daysAgo = HISTORY_DAYS - 1; daysAgo >= 1; daysAgo--) {
             settlementService.settle(ids[1], today.minusDays(daysAgo));
         }
+        addSampleNotifications(ids[0], ids[1], ids[2]);
         return userRepository.findById(ids[0]).orElseThrow();
     }
 
@@ -168,8 +173,12 @@ public class GuestService {
                 photo.width(), photo.height(), Timestamp.from(createdAt));
     }
 
-    /** 체험 계정의 최근 인증에 크루원들이 좋아요·응원 댓글을 남겨 둔다 */
-    private void addReactions(List<Long> guestCertIds, List<User> bots) {
+    /**
+     * 체험 계정의 최근 인증에 크루원들이 좋아요·응원 댓글을 남겨 둔다
+     *
+     * @return 댓글을 남긴 인증 id (없으면 null)
+     */
+    private Long addReactions(List<Long> guestCertIds, List<User> bots) {
         List<Long> recent = guestCertIds.subList(Math.max(0, guestCertIds.size() - 3), guestCertIds.size());
         for (Long certId : recent) {
             for (User bot : bots.subList(0, 2)) {
@@ -185,6 +194,32 @@ public class GuestService {
                         latest, bots.get(Integer.parseInt(c[0])).getId(), c[1], Timestamp.from(serviceTime.now()));
             }
             jdbc.update("update certifications set comment_count = comment_count + ? where id = ?", comments.length, latest);
+            return latest;
+        }
+        return null;
+    }
+
+    /**
+     * 알림함도 비어 있지 않게: 위에서 남긴 좋아요·댓글을 알림으로 넣어 둔다.
+     * 벌금 알림은 정산이 실제 규칙대로 남기므로, 그보다 뒤에(= 목록 위쪽에) 넣는다
+     */
+    private void addSampleNotifications(Long guestId, Long crewId, Long certId) {
+        if (certId == null) {
+            return;
+        }
+        String url = "/crews/" + crewId + "/certifications/" + certId;
+        List<String[]> comments = jdbc.query("""
+                        select u.nickname, cm.content from certification_comments cm join users u on u.id = cm.user_id
+                        where cm.certification_id = ? order by cm.id
+                        """,
+                (rs, i) -> new String[]{rs.getString("nickname"), rs.getString("content")}, certId);
+        if (comments.isEmpty()) {
+            return;
+        }
+        notificationService.create(guestId, NotificationService.Type.LIKE, "좋아요를 받았어요",
+                comments.getFirst()[0] + "님 외 1명이 내 인증을 좋아해요", url);
+        for (String[] c : comments) {
+            notificationService.create(guestId, NotificationService.Type.COMMENT, "새 댓글", c[0] + ": " + c[1], url);
         }
     }
 
