@@ -10,12 +10,12 @@ export function PushCard() {
 
   const on = state === 'on'
   return (
-    <section className="rounded-2xl border border-stone-200 bg-white px-4 py-4">
+    <section className="card px-4 py-4">
       <div className="flex items-center gap-3">
         <span
           className={clsx(
             'flex size-10 shrink-0 items-center justify-center rounded-xl',
-            on ? 'bg-brand-50 text-brand-600' : 'bg-stone-100 text-stone-400',
+            on ? 'border-2 border-ink bg-lime-300 text-ink' : 'border-2 border-stone-300 bg-white text-stone-400',
           )}
           aria-hidden
         >

@@ -1,13 +1,52 @@
 @import 'tailwindcss';
 
+/*
+ * HabitCrew 디자인: "습관 노트와 도장"
+ * - 모눈 노트 같은 배경, 굵은 잉크 테두리에 살짝 밀린 그림자(스티커처럼), 라임색 도장
+ * - 색: 잉크(진한 남색) + 바이올렛(브랜드) + 라임(완료·강조) + 코랄(빼먹음·위험)
+ */
 @theme {
-  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo',
+  --font-sans: 'SUIT Variable', SUIT, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo',
     'Malgun Gothic', sans-serif;
-  --color-brand-50: #f0fdf4;
-  --color-brand-100: #dcfce7;
-  --color-brand-500: #22c55e;
-  --color-brand-600: #16a34a;
-  --color-brand-700: #15803d;
+
+  /* 브랜드: 바이올렛 */
+  --color-brand-50: #f2f0ff;
+  --color-brand-100: #e4e0ff;
+  --color-brand-200: #cbc3ff;
+  --color-brand-500: #7a66f0;
+  --color-brand-600: #5f48e3;
+  --color-brand-700: #4b36c2;
+  --color-brand-800: #3a2a96;
+
+  /* 잉크: 글자·테두리·그림자 */
+  --color-ink: #1b1840;
+
+  /* 라임: 완료·도장·주요 버튼 */
+  --color-lime-300: #dcf98f;
+  --color-lime-400: #c6ef5e;
+  --color-lime-500: #a9d936;
+
+  /* 코랄: 빼먹음·위험 */
+  --color-coral-100: #ffe3df;
+  --color-coral-400: #ff8a7a;
+  --color-coral-600: #e2503c;
+
+  /* 회색은 차가운 톤으로 (stone 클래스를 그대로 쓰되 색만 바꾼다) */
+  --color-stone-50: #f6f7fb;
+  --color-stone-100: #eceef5;
+  --color-stone-200: #dcdfea;
+  --color-stone-300: #c2c6d6;
+  --color-stone-400: #9298ae;
+  --color-stone-500: #6b7089;
+  --color-stone-600: #4f546b;
+  --color-stone-700: #3a3e54;
+  --color-stone-800: #26283d;
+  --color-stone-900: #1b1840;
+
+  /* 스티커처럼 살짝 밀린 그림자 */
+  --shadow-hard: 3px 3px 0 0 var(--color-ink);
+  --shadow-hard-sm: 2px 2px 0 0 var(--color-ink);
+  --shadow-hard-lg: 5px 5px 0 0 var(--color-ink);
 }
 
 html,
@@ -17,11 +56,19 @@ body,
 }
 
 body {
-  @apply bg-stone-50 text-stone-900 antialiased;
+  @apply bg-stone-50 text-ink antialiased;
+  letter-spacing: -0.015em;
+  /* 모눈 노트처럼 옅은 점 격자 */
+  background-image: radial-gradient(circle, rgb(27 24 64 / 0.09) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-brand-600;
 }
 
 /*
- * 화면 폭: 휴대폰에서는 한 줄(최대 28rem), 데스크톱(lg, 1024px~)에서는 사이드바 옆 넓은 영역을 쓴다.
+ * 화면 폭: 휴대폰에서는 한 줄(최대 28rem), 데스크톱(lg, 1024px~)에서는 넓은 영역을 쓴다.
  * - page-narrow: 입력 화면 (크루 만들기, 인증 올리기 등)
  * - page-wide: 보는 화면 (홈, 크루, 기록, 인증 상세)
  */
@@ -32,4 +79,24 @@ body {
   .page-wide {
     @apply mx-auto min-h-dvh w-full max-w-md lg:min-h-0 lg:max-w-6xl;
   }
+}
+
+/* 기본 카드: 흰 종이 + 잉크 테두리 + 밀린 그림자 (@utility라서 lg:card 같은 변형도 쓸 수 있다) */
+@utility card {
+  @apply rounded-2xl border-2 border-ink bg-white shadow-hard;
+}
+
+/* 누를 수 있는 카드: 올리면 살짝 떠오른다 */
+@utility card-link {
+  @apply block rounded-2xl border-2 border-ink bg-white shadow-hard transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg;
+}
+
+/* 점선 카드: "새로 만들기"처럼 비어 있는 자리 */
+@utility card-empty {
+  @apply rounded-2xl border-2 border-dashed border-stone-300 bg-white/70;
+}
+
+/* 도장: 완료 표시 */
+@utility stamp {
+  @apply inline-flex -rotate-6 items-center gap-1 rounded-lg border-2 border-ink bg-lime-400 px-2.5 py-1 text-xs font-extrabold tracking-wider text-ink uppercase shadow-hard-sm;
 }

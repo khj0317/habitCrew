@@ -37,7 +37,7 @@ export function HomePage() {
       <main className="flex flex-1 flex-col px-5 pb-10 lg:px-0">
         <section className="mt-4 lg:mt-0">
           <p className="text-stone-500">안녕하세요,</p>
-          <h1 className="text-2xl font-bold lg:text-3xl">{user?.nickname}님 🙌</h1>
+          <h1 className="text-2xl font-black lg:text-4xl">{user?.nickname}님 🙌</h1>
         </section>
 
         <div className="mt-6 grid gap-3 lg:grid-cols-2 lg:items-start">
@@ -48,7 +48,7 @@ export function HomePage() {
         {isPending ? (
           <div className="mt-8 grid gap-3 lg:grid-cols-2 xl:grid-cols-3" aria-label="불러오는 중">
             {[0, 1].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-2xl bg-stone-200/60" />
+              <div key={i} className="h-32 animate-pulse rounded-2xl border-2 border-stone-200 bg-stone-100" />
             ))}
           </div>
         ) : isError ? (
@@ -65,7 +65,7 @@ export function HomePage() {
         ) : (
           <>
             <div className="mt-8 mb-3 flex items-center justify-between">
-              <h2 className="font-semibold text-stone-700">
+              <h2 className="text-lg font-black">
                 내 크루 <span className="text-brand-600">{crews.length}</span>
               </h2>
               <Link to="/join" className="text-sm font-medium text-stone-500 hover:text-stone-800">
@@ -82,7 +82,7 @@ export function HomePage() {
               <li>
                 <Link
                   to="/crews/new"
-                  className="flex h-14 items-center justify-center gap-1.5 rounded-2xl border border-dashed border-stone-300 text-sm font-medium text-stone-500 transition hover:border-brand-500 hover:text-brand-700 lg:h-full lg:min-h-36"
+                  className="flex h-14 items-center justify-center gap-1.5 card-empty text-sm font-medium text-stone-500 transition hover:border-brand-500 hover:text-brand-700 hover:border-ink hover:text-ink lg:h-full lg:min-h-36"
                 >
                   <Plus className="size-4" aria-hidden />새 크루 만들기
                 </Link>
@@ -99,12 +99,12 @@ function CrewCard({ crew }: { crew: CrewSummary }) {
   return (
     <Link
       to={`/crews/${crew.id}`}
-      className="block h-full rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-brand-500 hover:shadow-sm"
+      className="card-link h-full p-5"
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-[17px] font-bold leading-snug">{crew.name}</h3>
+        <h3 className="text-[17px] font-extrabold leading-snug">{crew.name}</h3>
         {crew.myRole === 'OWNER' && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-md border-2 border-ink bg-amber-200 px-2 py-0.5 text-xs font-bold text-ink">
             <Crown className="size-3" aria-hidden />
             크루장
           </span>
@@ -129,8 +129,8 @@ function CrewCard({ crew }: { crew: CrewSummary }) {
 function EmptyCrews() {
   const navigate = useNavigate()
   return (
-    <section className="mt-8 flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center lg:flex-none lg:py-20">
-      <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-3xl">🌱</div>
+    <section className="mt-8 flex flex-1 flex-col items-center justify-center card-empty px-6 py-14 text-center lg:flex-none lg:py-20">
+      <div className="flex size-14 items-center justify-center rounded-xl border-2 border-ink bg-lime-300 text-3xl">🌱</div>
       <h2 className="mt-5 text-lg font-semibold">아직 참여한 크루가 없어요</h2>
       <p className="mt-2 text-sm leading-relaxed text-stone-500">
         크루를 직접 만들거나, 친구에게 받은

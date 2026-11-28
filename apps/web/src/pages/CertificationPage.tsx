@@ -38,7 +38,7 @@ export function CertificationPage() {
     return (
       <div className="page-wide">
         <PageHeader back={`/crews/${crewId}`} />
-        <div className="mx-5 aspect-square animate-pulse rounded-3xl bg-stone-200/60" />
+        <div className="mx-5 aspect-square animate-pulse rounded-2xl border-2 border-stone-200 bg-stone-100" />
       </div>
     )
   }
@@ -87,7 +87,7 @@ export function CertificationPage() {
       {/* 넓은 화면(1280px~): 왼쪽 사진, 오른쪽 내용·댓글 */}
       <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start xl:gap-8">
       <div>
-      <div className="bg-stone-900 lg:overflow-hidden lg:rounded-3xl">
+      <div className="bg-ink lg:overflow-hidden lg:rounded-2xl lg:border-2 lg:border-ink lg:shadow-hard">
         {c.imageUrl ? (
           <img
             src={c.imageUrl}
@@ -112,7 +112,7 @@ export function CertificationPage() {
       )}
       </div>
 
-      <div className="lg:rounded-3xl lg:border lg:border-stone-200 lg:bg-white lg:pb-5">
+      <div className="lg:rounded-2xl lg:border-2 lg:border-ink lg:bg-white lg:pb-5 lg:shadow-hard">
       <section className="px-5 pt-4">
         <div className="flex items-center gap-2.5">
           <Avatar userId={c.author.userId} nickname={c.author.nickname} size="sm" />
@@ -131,8 +131,8 @@ export function CertificationPage() {
           onClick={() => toggleLike.mutate({ id: c.id, like: !c.likedByMe })}
           aria-pressed={c.likedByMe}
           className={clsx(
-            'mt-4 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium ring-1 transition',
-            c.likedByMe ? 'bg-rose-50 text-rose-600 ring-rose-200' : 'bg-white text-stone-600 ring-stone-200',
+            'mt-4 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-bold ring-2 shadow-hard-sm transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none',
+            c.likedByMe ? 'bg-coral-100 text-ink ring-ink' : 'bg-white text-ink ring-ink',
           )}
         >
           <Heart className={clsx('size-4', c.likedByMe && 'fill-rose-500 text-rose-500')} aria-hidden />
@@ -246,13 +246,13 @@ function Comments({ crewId, certificationId, count }: { crewId: number; certific
             onChange={(e) => setContent(e.target.value)}
             placeholder="응원의 한마디를 남겨 주세요"
             maxLength={300}
-            className="h-11 w-full rounded-full border border-stone-200 bg-stone-50 px-4 text-[15px] outline-none focus:border-brand-600 focus:bg-white focus:ring-4 focus:ring-brand-100"
+            className="h-11 w-full rounded-xl border-2 border-stone-300 bg-stone-50 px-4 text-[15px] outline-none focus:border-ink focus:bg-white"
           />
         </div>
         <Button
           type="submit"
           aria-label="댓글 보내기"
-          className="!h-11 !w-11 shrink-0 !rounded-full !px-0"
+          className="!h-11 !w-11 shrink-0 !px-0"
           disabled={!content.trim()}
           loading={add.isPending}
         >
@@ -322,7 +322,7 @@ function ReportDialog({ crewId, id, open, onClose }: { crewId: number; id: numbe
 function HiddenNotice({ crewId, id, isOwner }: { crewId: number; id: number; isOwner: boolean }) {
   const setHidden = useSetHidden(crewId)
   return (
-    <div className="mx-5 mt-3 flex items-center gap-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800 lg:mx-0">
+    <div className="mx-5 mt-3 flex items-center gap-3 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-amber-800 lg:mx-0">
       <EyeOff className="size-4 shrink-0" aria-hidden />
       <p className="flex-1">신고로 가려진 사진이에요. 크루원에게는 보이지 않아요.</p>
       {isOwner && (

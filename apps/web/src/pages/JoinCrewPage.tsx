@@ -43,7 +43,7 @@ function EnterCodeView() {
           autoCapitalize="characters"
           spellCheck={false}
           maxLength={12}
-          className="mt-8 h-16 rounded-2xl border border-stone-200 bg-white text-center font-mono text-2xl font-semibold tracking-[0.2em] outline-none transition placeholder:text-stone-300 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+          className="mt-8 h-16 rounded-xl border-2 border-ink bg-white shadow-hard text-center font-mono text-2xl font-semibold tracking-[0.2em] outline-none transition placeholder:text-stone-300 focus:shadow-hard-lg"
         />
         <p className="mt-3 text-center text-[13px] text-stone-500">영문과 숫자 8자리예요</p>
         <Button type="submit" disabled={!valid} className="mt-8">
@@ -75,7 +75,7 @@ function InvitePreviewView({ code }: { code: string }) {
       <PageHeader title="크루 초대" back="/join" />
       <main className="flex flex-1 flex-col px-5 pt-4 pb-8">
         {isPending ? (
-          <div className="h-72 animate-pulse rounded-3xl bg-stone-200/60" aria-label="불러오는 중" />
+          <div className="h-72 animate-pulse rounded-2xl border-2 border-stone-200 bg-stone-100" aria-label="불러오는 중" />
         ) : error || !crew ? (
           <div className="flex flex-col items-center py-16 text-center">
             <div className="text-4xl">🔍</div>
@@ -91,7 +91,7 @@ function InvitePreviewView({ code }: { code: string }) {
           </div>
         ) : (
           <>
-            <section className="rounded-3xl border border-stone-200 bg-white p-6">
+            <section className="card p-6">
               <p className="inline-flex items-center gap-1 text-[13px] text-stone-500">
                 <Crown className="size-3.5 text-amber-500" aria-hidden />
                 {crew.ownerNickname}님의 크루
@@ -130,7 +130,7 @@ function InvitePreviewView({ code }: { code: string }) {
 
 function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-stone-50 px-2 py-3">
+    <div className="rounded-xl border-2 border-stone-200 bg-stone-50 px-2 py-3">
       <dt className="flex items-center justify-center gap-1 text-xs text-stone-500">
         <span className="text-stone-400" aria-hidden>
           {icon}

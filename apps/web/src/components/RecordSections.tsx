@@ -12,18 +12,18 @@ export function MonthSwitcher({ month, onChange }: { month: string; onChange: (m
       <button
         onClick={() => onChange(shiftMonth(month, -1))}
         aria-label="이전 달"
-        className="flex size-9 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100"
+        className="flex size-9 items-center justify-center rounded-lg border-2 border-ink bg-white text-ink shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
       >
         <ChevronLeft className="size-5" />
       </button>
-      <span className="min-w-28 text-center font-semibold tabular-nums" aria-live="polite">
+      <span className="min-w-28 text-center text-lg font-black tabular-nums" aria-live="polite">
         {formatMonth(month)}
       </span>
       <button
         onClick={() => onChange(shiftMonth(month, 1))}
         aria-label="다음 달"
         disabled={isCurrent}
-        className="flex size-9 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 disabled:opacity-30"
+        className="flex size-9 items-center justify-center rounded-lg border-2 border-ink bg-white text-ink shadow-hard-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-30 disabled:shadow-none"
       >
         <ChevronRight className="size-5" />
       </button>
@@ -55,14 +55,14 @@ export function RankingCard({ crewId, month, myUserId }: { crewId: number; month
                   {e.nickname}
                   {e.userId === myUserId && <span className="ml-1 text-xs text-stone-400">(나)</span>}
                 </p>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-stone-100">
+                <div className="mt-1 h-2.5 overflow-hidden rounded-sm border-2 border-ink bg-white">
                   <div
-                    className="h-full rounded-full bg-brand-500"
+                    className="h-full bg-brand-500"
                     style={{ width: `${top === 0 ? 0 : (e.count / top) * 100}%` }}
                   />
                 </div>
               </div>
-              <span className="w-10 text-right text-sm font-semibold tabular-nums">{e.count}회</span>
+              <span className="w-10 text-right text-sm font-extrabold tabular-nums">{e.count}회</span>
             </li>
           ))}
         </ol>
@@ -72,10 +72,10 @@ export function RankingCard({ crewId, month, myUserId }: { crewId: number; month
 }
 
 const STATUS_STYLE: Record<DayStatus, { cell: string; label: string }> = {
-  CERTIFIED: { cell: 'bg-brand-500 text-white', label: '인증함' },
-  MISSED: { cell: 'bg-red-100 text-red-600', label: '빼먹음' },
-  REST: { cell: 'bg-stone-50 text-stone-300', label: '쉬는 날' },
-  PENDING: { cell: 'bg-white text-brand-700 ring-2 ring-inset ring-brand-500', label: '오늘 (아직)' },
+  CERTIFIED: { cell: 'border-2 border-ink bg-lime-400 text-ink shadow-hard-sm', label: '인증함' },
+  MISSED: { cell: 'border-2 border-coral-400 bg-coral-100 text-coral-600', label: '빼먹음' },
+  REST: { cell: 'bg-stone-100 text-stone-300', label: '쉬는 날' },
+  PENDING: { cell: 'border-2 border-dashed border-ink bg-white text-ink', label: '오늘 (아직)' },
   FUTURE: { cell: 'text-stone-300', label: '' },
   NOT_JOINED: { cell: 'text-stone-200', label: '참여 전' },
 }
@@ -114,10 +114,10 @@ export function CalendarCard({
               aria-selected={member.userId === selectedUserId}
               onClick={() => onSelectUser(member.userId)}
               className={clsx(
-                'shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition',
+                'shrink-0 rounded-md border-2 px-3 py-1.5 text-xs font-bold transition',
                 member.userId === selectedUserId
-                  ? 'bg-stone-900 text-white'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200',
+                  ? 'border-ink bg-ink text-lime-400'
+                  : 'border-stone-300 bg-white text-stone-600 hover:border-ink',
               )}
             >
               {member.nickname}
@@ -149,7 +149,7 @@ export function CalendarCard({
                   title={style.label ? `${m}월 ${dayNumber}일 · ${style.label}` : undefined}
                   aria-label={`${m}월 ${dayNumber}일 ${style.label}`}
                   className={clsx(
-                    'flex aspect-square items-center justify-center rounded-lg text-xs font-semibold tabular-nums',
+                    'flex aspect-square items-center justify-center rounded-md text-xs font-bold tabular-nums',
                     style.cell,
                   )}
                 >
@@ -172,8 +172,8 @@ export function CalendarCard({
 
 function Card({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl border border-stone-200 bg-white p-5">
-      <h2 className="font-semibold">{title}</h2>
+    <section className="card p-5">
+      <h2 className="text-lg font-black">{title}</h2>
       <p className="mt-0.5 mb-4 text-xs text-stone-500">{subtitle}</p>
       {children}
     </section>

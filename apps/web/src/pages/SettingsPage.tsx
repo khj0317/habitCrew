@@ -16,7 +16,7 @@ export function SettingsPage() {
     <div className="page-narrow pb-16">
       <PageHeader title="설정" />
       <main className="flex flex-col gap-5 px-5 lg:px-0">
-        <section className="flex items-center justify-between rounded-2xl bg-white px-5 py-4 ring-1 ring-stone-200">
+        <section className="flex items-center justify-between card px-5 py-4">
           <div>
             <p className="font-semibold">{user.nickname}</p>
             <p className="text-sm text-stone-500">{user.guest ? '체험 계정' : user.email}</p>
@@ -24,7 +24,7 @@ export function SettingsPage() {
         </section>
 
         {user.guest && (
-          <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">
+          <div className="rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">
             체험 계정은 닉네임·비밀번호를 바꾸거나 탈퇴할 수 없어요. 24시간 뒤 자동으로 사라져요.
           </div>
         )}
@@ -62,7 +62,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Card({ children }: { children: ReactNode }) {
-  return <div className="rounded-2xl bg-white px-5 py-5 ring-1 ring-stone-200">{children}</div>
+  return <div className="card px-5 py-5">{children}</div>
 }
 
 function ActivityToggle({ user }: { user: User }) {
@@ -84,7 +84,7 @@ function ActivityToggle({ user }: { user: User }) {
   }
 
   return (
-    <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-stone-200">
+    <div className="card px-4 py-4">
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">댓글·좋아요 알림</p>
@@ -215,7 +215,7 @@ function PasswordForm() {
           hint="영문과 숫자를 섞어 8자 이상"
         />
         {message && (
-          <p className="rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-700" role="status">
+          <p className="rounded-xl border-2 border-ink bg-lime-300 px-4 py-3 text-sm font-medium text-ink" role="status">
             {message}
           </p>
         )}

@@ -12,7 +12,7 @@ export function TodayCard({ crewId }: { crewId: number }) {
   const { data: today, isPending, isError } = useToday(crewId)
   const now = useNow(30_000)
 
-  if (isPending) return <div className="h-40 animate-pulse rounded-3xl bg-stone-200/60" />
+  if (isPending) return <div className="h-40 animate-pulse rounded-2xl border-2 border-stone-200 bg-stone-100" />
   if (isError) return null
 
   const done = today.myCertificationId !== null
@@ -21,30 +21,39 @@ export function TodayCard({ crewId }: { crewId: number }) {
   return (
     <section
       className={clsx(
-        'rounded-3xl p-5',
-        !today.certDay ? 'bg-stone-100' : done ? 'bg-brand-50' : 'bg-white ring-2 ring-brand-500',
+        'relative overflow-hidden rounded-2xl border-2 p-5',
+        !today.certDay
+          ? 'border-dashed border-stone-300 bg-white/70'
+          : done
+            ? 'border-ink bg-lime-300 shadow-hard'
+            : 'border-ink bg-white shadow-hard-lg',
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium text-stone-500">
+          <p className="text-xs font-bold tracking-wide text-stone-500 uppercase">
             {new Date(today.date + 'T00:00:00').toLocaleDateString('ko-KR', {
               month: 'long',
               day: 'numeric',
               weekday: 'short',
             })}
           </p>
-          <h2 className="mt-1 text-lg font-bold">
+          <h2 className="mt-1 text-xl font-black">
             {!today.certDay ? '오늘은 쉬는 날이에요' : done ? '오늘 인증 완료! 🎉' : '오늘 인증이 남았어요'}
           </h2>
           {today.certDay && !done && (
-            <p className="mt-0.5 text-sm font-medium text-brand-700">{formatRemaining(today.deadline, now)}</p>
+            <p className="mt-1 inline-flex items-center gap-1 rounded-md bg-ink px-2 py-0.5 text-xs font-bold text-lime-400">
+              ⏳ {formatRemaining(today.deadline, now)}
+            </p>
           )}
         </div>
         {!today.certDay ? (
           <Coffee className="size-7 text-stone-400" aria-hidden />
         ) : done ? (
-          <CheckCircle2 className="size-7 text-brand-600" aria-hidden />
+          // 완료 도장
+          <span className="stamp mt-1 bg-white text-sm" aria-hidden>
+            <CheckCircle2 className="size-4" /> Done
+          </span>
         ) : null}
       </div>
 
@@ -52,16 +61,16 @@ export function TodayCard({ crewId }: { crewId: number }) {
         <>
           <div className="mt-4 flex items-center gap-3">
             <div
-              className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200"
+              className="h-3 flex-1 overflow-hidden rounded-md border-2 border-ink bg-white"
               role="progressbar"
               aria-valuemin={0}
               aria-valuemax={today.memberCount}
               aria-valuenow={today.certifiedCount}
               aria-label="오늘 인증한 크루원"
             >
-              <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${progress * 100}%` }} />
+              <div className="h-full bg-brand-500 transition-all" style={{ width: `${progress * 100}%` }} />
             </div>
-            <span className="text-sm font-semibold tabular-nums text-stone-600">
+            <span className="text-sm font-extrabold tabular-nums">
               {today.certifiedCount}/{today.memberCount}
             </span>
           </div>
@@ -71,7 +80,7 @@ export function TodayCard({ crewId }: { crewId: number }) {
                 <Avatar userId={m.userId} nickname={m.nickname} size="sm" dimmed={!m.certified} />
                 {m.certified && (
                   <CheckCircle2
-                    className="absolute -right-0.5 -bottom-0.5 size-3.5 rounded-full bg-white fill-brand-600 text-white"
+                    className="absolute -right-1 -bottom-1 size-4 rounded-full bg-white fill-lime-400 text-ink"
                     aria-hidden
                   />
                 )}

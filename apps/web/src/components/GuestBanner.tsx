@@ -11,7 +11,7 @@ export function GuestBanner() {
   const hoursLeft = Math.max(0, Math.ceil((new Date(user.guestExpiresAt).getTime() - Date.now()) / 3_600_000))
 
   return (
-    <section className="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 px-4 py-4 text-white" role="note">
+    <section className="rounded-2xl border-2 border-ink bg-brand-600 px-4 py-4 text-white shadow-hard" role="note">
       <p className="flex items-center gap-1.5 text-sm font-semibold">
         <Sparkles className="size-4" aria-hidden />
         체험 계정으로 둘러보는 중이에요
@@ -24,7 +24,7 @@ export function GuestBanner() {
           await logout()
           navigate('/signup')
         }}
-        className="mt-3 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold hover:bg-white/25"
+        className="mt-3 rounded-lg border-2 border-ink bg-lime-400 px-3 py-1.5 text-xs font-bold text-ink shadow-hard-sm hover:bg-lime-300"
       >
         회원가입하고 내 크루 만들기
       </button>

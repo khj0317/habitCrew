@@ -38,8 +38,8 @@ export function SettlementsPage() {
           </>
         )}
         {stats && (
-          <section className="rounded-3xl border border-stone-200 bg-white p-5">
-            <h2 className="font-semibold">크루원 기록</h2>
+          <section className="card p-5">
+            <h2 className="text-lg font-black">크루원 기록</h2>
             <p className="mt-0.5 text-xs text-stone-500">연속 인증이 긴 순서예요</p>
             <ol className="mt-4 flex flex-col gap-3">
               {stats.members.map((m, index) => (
@@ -61,7 +61,7 @@ export function SettlementsPage() {
                       {m.currentStreak}일 연속
                     </p>
                     <p
-                      className={`text-xs tabular-nums ${m.totalPenaltyPoints > 0 ? 'text-red-600' : 'text-stone-400'}`}
+                      className={`text-xs tabular-nums ${m.totalPenaltyPoints > 0 ? 'text-coral-600' : 'text-stone-400'}`}
                     >
                       벌금 {formatPoints(m.totalPenaltyPoints)}
                     </p>
@@ -73,14 +73,14 @@ export function SettlementsPage() {
         )}
 
         <section>
-          <h2 className="mb-1 px-1 font-semibold">날짜별 정산</h2>
+          <h2 className="mb-1 px-1 text-lg font-black">날짜별 정산</h2>
           <p className="mb-3 px-1 text-xs text-stone-500">매일 0시 5분에 전날 인증을 확인해 벌금을 매겨요</p>
           {isPending ? (
-            <div className="h-32 animate-pulse rounded-3xl bg-stone-200/60" />
+            <div className="h-32 animate-pulse rounded-2xl border-2 border-stone-200 bg-stone-100" />
           ) : isError ? (
             <ErrorState message="정산 내역을 불러오지 못했어요." />
           ) : items.length === 0 ? (
-            <div className="rounded-3xl bg-white px-6 py-12 text-center ring-1 ring-stone-200">
+            <div className="card px-6 py-12 text-center">
               <div className="text-3xl">🧾</div>
               <p className="mt-3 font-medium">아직 정산된 날이 없어요</p>
               <p className="mt-1 text-sm text-stone-500">첫 인증일이 지나면 여기에 기록돼요.</p>
@@ -90,7 +90,7 @@ export function SettlementsPage() {
               {items.map((s) => {
                 const allDone = s.penalties.length === 0
                 return (
-                  <li key={s.date} className="rounded-2xl border border-stone-200 bg-white px-4 py-4">
+                  <li key={s.date} className="card px-4 py-4">
                     <div className="flex items-baseline justify-between">
                       <p className="font-semibold">
                         {new Date(s.date + 'T00:00:00').toLocaleDateString('ko-KR', {
@@ -106,13 +106,13 @@ export function SettlementsPage() {
                     {s.targetCount === 0 ? (
                       <p className="mt-2 text-sm text-stone-400">대상 크루원이 없었어요 (첫날 참여자는 정산하지 않아요)</p>
                     ) : allDone ? (
-                      <p className="mt-2 text-sm font-medium text-brand-700">🎉 모두 인증했어요!</p>
+                      <p className="stamp mt-3">🎉 모두 인증했어요!</p>
                     ) : (
                       <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="벌금을 받은 크루원">
                         {s.penalties.map((p) => (
                           <li
                             key={p.userId}
-                            className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs text-red-700"
+                            className="inline-flex items-center gap-1 rounded-md border-2 border-coral-400 bg-coral-100 px-2 py-0.5 text-xs font-semibold text-ink"
                           >
                             {p.nickname}
                             <span className="font-semibold tabular-nums">−{formatPoints(p.points)}</span>

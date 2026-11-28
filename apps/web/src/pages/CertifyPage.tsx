@@ -66,7 +66,7 @@ export function CertifyPage() {
         />
 
         {photo ? (
-          <div className="relative overflow-hidden rounded-3xl bg-stone-100">
+          <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-stone-100 shadow-hard">
             <img src={photo.previewUrl} alt="올릴 인증 사진 미리보기" className="max-h-[60vh] w-full object-contain" />
             <button
               onClick={() => inputRef.current?.click()}
@@ -79,13 +79,13 @@ export function CertifyPage() {
         ) : (
           <label
             htmlFor="photo-input"
-            className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-stone-300 bg-white text-stone-500 transition hover:border-brand-500 hover:text-brand-700"
+            className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-3 card-empty text-stone-500 transition hover:border-ink hover:text-ink"
           >
             {preparing ? (
               <span className="text-sm">사진을 준비하는 중…</span>
             ) : (
               <>
-                <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+                <span className="flex size-14 items-center justify-center rounded-xl border-2 border-ink bg-lime-300 text-ink">
                   <Camera className="size-7" aria-hidden />
                 </span>
                 <span className="font-semibold text-stone-700">사진 찍기 또는 고르기</span>

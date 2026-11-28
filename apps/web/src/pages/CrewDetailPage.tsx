@@ -31,7 +31,7 @@ export function CrewDetailPage() {
       <div className="page-wide">
         <PageHeader />
         <div className="px-5">
-          <div className="h-48 animate-pulse rounded-3xl bg-stone-200/60" />
+          <div className="h-48 animate-pulse rounded-2xl border-2 border-stone-200 bg-stone-100" />
         </div>
       </div>
     )
@@ -73,18 +73,18 @@ export function CrewDetailPage() {
       <main className="flex flex-col gap-4 px-5 lg:mx-auto lg:max-w-2xl lg:px-0 xl:grid xl:max-w-none xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-x-10 xl:gap-y-6 2xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="flex flex-col gap-4 xl:col-start-1">
         {(welcome.created || welcome.joined) && (
-          <div className="rounded-2xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700" role="status">
+          <div className="rounded-xl border-2 border-ink bg-lime-300 px-4 py-3 text-sm font-bold text-ink" role="status">
             {welcome.created ? '🎉 크루를 만들었어요! 아래 초대 코드를 친구에게 보내 보세요.' : '🎉 크루에 참여했어요!'}
           </div>
         )}
         {welcome.certified && (
-          <div className="rounded-2xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700" role="status">
+          <div className="rounded-xl border-2 border-ink bg-lime-300 px-4 py-3 text-sm font-bold text-ink" role="status">
             ✅ 인증을 올렸어요! 크루원들의 응원을 기다려 보세요.
           </div>
         )}
 
         <section>
-          <h1 className="text-2xl font-bold leading-snug lg:text-3xl">{crew.name}</h1>
+          <h1 className="text-2xl font-black leading-snug lg:text-4xl">{crew.name}</h1>
           {crew.description && <p className="mt-2 leading-relaxed text-stone-600">{crew.description}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
             <InfoChip icon={<CalendarDays className="size-3.5" />}>{formatDays(crew.certDays)} 인증</InfoChip>
@@ -103,8 +103,8 @@ export function CrewDetailPage() {
 
         <InviteCard crew={crew} onRegenerate={() => setPending({ kind: 'regenerate' })} />
 
-        <section className="rounded-3xl border border-stone-200 bg-white">
-          <h2 className="px-5 pt-5 pb-2 font-semibold">
+        <section className="card">
+          <h2 className="px-5 pt-5 pb-2 font-extrabold">
             크루원 <span className="text-brand-600">{crew.members.length}</span>
           </h2>
           <ul className="pb-2">
@@ -152,7 +152,7 @@ function LeaveButton({ className, onClick }: { className: string; onClick: () =>
 
 function InfoChip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[13px] text-stone-700 ring-1 ring-stone-200">
+    <span className="inline-flex items-center gap-1.5 rounded-md border-2 border-ink bg-white px-2.5 py-1 text-[13px] font-semibold text-ink">
       <span className="text-stone-400" aria-hidden>
         {icon}
       </span>
@@ -196,9 +196,9 @@ function InviteCard({ crew, onRegenerate }: { crew: CrewDetail; onRegenerate: ()
   }
 
   return (
-    <section className="rounded-3xl bg-stone-900 p-5 text-white">
+    <section className="rounded-2xl border-2 border-ink bg-ink p-5 text-white shadow-[4px_4px_0_0_var(--color-brand-500)]">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-stone-300">초대 코드</h2>
+        <h2 className="text-sm font-bold text-lime-400">초대 코드</h2>
         {crew.myRole === 'OWNER' && (
           <button
             onClick={onRegenerate}
@@ -210,16 +210,16 @@ function InviteCard({ crew, onRegenerate }: { crew: CrewDetail; onRegenerate: ()
       </div>
       <button
         onClick={() => copy('code')}
-        className="mt-2 flex w-full items-center justify-between rounded-2xl bg-white/10 px-4 py-3 text-left transition hover:bg-white/15"
+        className="mt-2 flex w-full items-center justify-between rounded-xl border-2 border-dashed border-white/30 px-4 py-3 text-left transition hover:bg-white/15"
         aria-label={`초대 코드 ${crew.inviteCode} 복사`}
       >
         <span className="font-mono text-2xl font-semibold tracking-[0.15em]">{formatInviteCode(crew.inviteCode)}</span>
-        {copied === 'code' ? <Check className="size-5 text-brand-500" /> : <Copy className="size-5 text-stone-400" />}
+        {copied === 'code' ? <Check className="size-5 text-lime-400" /> : <Copy className="size-5 text-stone-400" />}
       </button>
       <button
         onClick={share}
         disabled={full}
-        className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 text-[15px] font-semibold transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-stone-400"
+        className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-ink bg-lime-400 text-[15px] font-bold text-ink transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:border-white/20 disabled:bg-white/10 disabled:text-stone-400"
       >
         {copied === 'link' ? <Check className="size-4" aria-hidden /> : <Share2 className="size-4" aria-hidden />}
         {full ? '정원이 가득 찼어요' : copied === 'link' ? '초대 링크를 복사했어요' : '초대 링크 보내기'}
@@ -250,8 +250,8 @@ function MemberRow({
     <li className="relative flex items-center gap-3 px-5 py-2.5">
       <div
         className={clsx(
-          'flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold',
-          member.role === 'OWNER' ? 'bg-amber-100 text-amber-700' : 'bg-brand-50 text-brand-700',
+          'flex size-10 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold',
+          member.role === 'OWNER' ? 'border-2 border-ink bg-amber-200 text-ink' : 'border-2 border-ink bg-brand-100 text-ink',
         )}
         aria-hidden
       >

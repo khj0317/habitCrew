@@ -16,7 +16,7 @@ function AuthLayout({ title, subtitle, children }: { title: string; subtitle: st
       <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 py-10 lg:justify-center lg:py-16">
         <Logo className="text-lg text-stone-900 lg:hidden" />
         <div className="mt-12 mb-8 lg:mt-0">
-          <h1 className="text-2xl font-bold leading-snug lg:text-3xl">{title}</h1>
+          <h1 className="text-2xl font-black leading-snug lg:text-3xl">{title}</h1>
           <p className="mt-2 text-stone-500">{subtitle}</p>
         </div>
         {children}
@@ -34,36 +34,36 @@ const FEATURES = [
 
 function BrandPanel() {
   return (
-    <aside className="relative hidden overflow-hidden bg-gradient-to-br from-brand-600 to-brand-700 px-14 py-14 text-white lg:flex lg:flex-col">
+    <aside className="relative hidden overflow-hidden border-r-2 border-ink bg-ink bg-[radial-gradient(circle,rgb(255_255_255/0.12)_1px,transparent_1.2px)] bg-[size:22px_22px] px-14 py-14 text-white lg:flex lg:flex-col">
       <div
-        className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10"
+        className="pointer-events-none absolute top-24 -right-10 size-40 rotate-12 rounded-3xl border-2 border-lime-400/40"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-white/5"
+        className="pointer-events-none absolute -bottom-10 left-1/3 size-32 -rotate-6 rounded-2xl bg-brand-600/40"
         aria-hidden
       />
       <span className="relative inline-flex items-center gap-2 text-xl font-bold">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-white text-brand-600" aria-hidden>
+        <span className="flex size-9 -rotate-6 items-center justify-center rounded-xl bg-lime-400 font-black text-ink" aria-hidden>
           ✓
         </span>
         HabitCrew
       </span>
       <div className="relative my-auto max-w-md">
-        <h2 className="text-4xl leading-tight font-bold">
+        <h2 className="text-5xl leading-tight font-black">
           혼자서는 사흘,
           <br />
-          크루와 함께라면 오래.
+          크루와 함께라면 <span className="bg-lime-400 px-1 text-ink">오래.</span>
         </h2>
         <p className="mt-4 text-lg text-white/80">친구들과 매일 인증하며 습관을 만드는 서비스예요.</p>
         <ul className="mt-10 flex flex-col gap-5">
           {FEATURES.map((f) => (
             <li key={f.title} className="flex gap-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-xl" aria-hidden>
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border-2 border-white/20 bg-white/10 text-xl" aria-hidden>
                 {f.emoji}
               </span>
               <div>
-                <p className="font-semibold">{f.title}</p>
+                <p className="font-extrabold">{f.title}</p>
                 <p className="text-sm text-white/75">{f.text}</p>
               </div>
             </li>
@@ -116,7 +116,7 @@ export function LoginPage() {
   return (
     <AuthLayout title={'다시 만나서 반가워요 👋'} subtitle="오늘의 인증, 크루가 기다리고 있어요.">
       {(location.state as { passwordReset?: boolean } | null)?.passwordReset && (
-        <div className="mb-4 rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700" role="status">
+        <div className="mb-4 rounded-xl border-2 border-ink bg-lime-300 px-4 py-3 text-sm font-bold text-ink" role="status">
           비밀번호를 바꿨어요. 새 비밀번호로 로그인해 주세요.
         </div>
       )}
@@ -282,7 +282,7 @@ export function ForgotPasswordPage() {
     <AuthLayout title="비밀번호 찾기 🔑" subtitle="가입한 이메일로 비밀번호를 다시 정하는 링크를 보내 드려요.">
       {sent ? (
         <div className="flex flex-col gap-4">
-          <div className="rounded-2xl bg-brand-50 px-5 py-4 text-sm leading-relaxed text-brand-800" role="status">
+          <div className="rounded-xl border-2 border-ink bg-lime-300 px-5 py-4 text-sm leading-relaxed text-ink" role="status">
             <p className="font-semibold">메일을 확인해 주세요 📮</p>
             <p className="mt-1">
               {email}(으)로 가입돼 있다면 재설정 링크를 보냈어요. 링크는 30분 동안 한 번만 쓸 수 있어요. 메일이 안 보이면

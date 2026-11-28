@@ -11,11 +11,11 @@ export function CertificationCard({ crewId, certification: c }: { crewId: number
   const detail = `/crews/${crewId}/certifications/${c.id}`
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
+    <article className="card overflow-hidden">
       <header className="flex items-center gap-2.5 px-4 py-3">
         <Avatar userId={c.author.userId} nickname={c.author.nickname} size="sm" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">
+          <p className="truncate text-sm font-extrabold">
             {c.author.nickname}
             {c.mine && <span className="ml-1 text-xs font-normal text-stone-400">(나)</span>}
           </p>
@@ -27,7 +27,7 @@ export function CertificationCard({ crewId, certification: c }: { crewId: number
 
       <Link
         to={detail}
-        className="relative block bg-stone-100"
+        className="relative block border-y-2 border-ink bg-stone-100"
         aria-label={`${c.author.nickname}님의 인증 사진 크게 보기`}
       >
         {c.thumbnailUrl ? (
@@ -46,7 +46,7 @@ export function CertificationCard({ crewId, certification: c }: { crewId: number
               />
             </picture>
             {c.hidden && (
-              <span className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
+              <span className="absolute top-3 left-3 rounded-md border-2 border-ink bg-amber-200 px-2 py-0.5 text-xs font-bold text-ink">
                 🙈 가려진 사진 · 크루원에게 안 보여요
               </span>
             )}
@@ -68,19 +68,19 @@ export function CertificationCard({ crewId, certification: c }: { crewId: number
             onClick={() => toggleLike.mutate({ id: c.id, like: !c.likedByMe })}
             aria-pressed={c.likedByMe}
             aria-label={c.likedByMe ? '좋아요 취소' : '좋아요'}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full px-2 text-sm text-stone-600 hover:bg-stone-100"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-ink hover:bg-stone-100"
           >
             <Heart
-              className={clsx('size-5 transition', c.likedByMe ? 'fill-rose-500 text-rose-500' : 'text-stone-500')}
+              className={clsx('size-5 transition', c.likedByMe ? 'fill-coral-400 text-ink' : 'text-ink')}
             />
             <span className="tabular-nums">{c.likeCount}</span>
           </button>
           <Link
             to={detail}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full px-2 text-sm text-stone-600 hover:bg-stone-100"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-ink hover:bg-stone-100"
             aria-label={`댓글 ${c.commentCount}개`}
           >
-            <MessageCircle className="size-5 text-stone-500" />
+            <MessageCircle className="size-5 text-ink" />
             <span className="tabular-nums">{c.commentCount}</span>
           </Link>
         </div>

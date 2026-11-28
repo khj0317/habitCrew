@@ -94,7 +94,7 @@ export function CreateCrewPage() {
 
         <MaxMembersStepper value={maxMembers} onChange={setMaxMembers} error={errors.maxMembers} />
 
-        <div className="rounded-xl bg-amber-50 px-4 py-3 text-[13px] leading-relaxed text-amber-800">
+        <div className="rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-3 text-[13px] leading-relaxed text-amber-800">
           인증 요일과 벌금은 크루를 만든 뒤에는 바꿀 수 없어요. 정산 도중 규칙이 바뀌면 크루원끼리 헷갈리기 때문이에요.
         </div>
 
