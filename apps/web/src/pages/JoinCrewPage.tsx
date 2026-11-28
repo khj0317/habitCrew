@@ -26,7 +26,7 @@ function EnterCodeView() {
   }
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md">
+    <div className="page-narrow">
       <PageHeader title="초대 코드로 참여" />
       <form onSubmit={onSubmit} className="flex flex-col px-5 pt-6">
         <label htmlFor="invite-code" className="text-xl font-bold leading-snug">
@@ -71,7 +71,7 @@ function InvitePreviewView({ code }: { code: string }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
+    <div className="page-narrow flex flex-col">
       <PageHeader title="크루 초대" back="/join" />
       <main className="flex flex-1 flex-col px-5 pt-4 pb-8">
         {isPending ? (

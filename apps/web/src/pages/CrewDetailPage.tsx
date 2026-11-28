@@ -28,7 +28,7 @@ export function CrewDetailPage() {
 
   if (isPending) {
     return (
-      <div className="mx-auto min-h-dvh w-full max-w-md">
+      <div className="page-wide">
         <PageHeader />
         <div className="px-5">
           <div className="h-48 animate-pulse rounded-3xl bg-stone-200/60" />
@@ -40,7 +40,7 @@ export function CrewDetailPage() {
   if (isError) {
     const notFound = error instanceof ApiError && error.status === 404
     return (
-      <div className="mx-auto min-h-dvh w-full max-w-md">
+      <div className="page-wide">
         <PageHeader />
         <ErrorState
           message={notFound ? '크루를 찾을 수 없어요. 내보내졌거나 크루가 사라졌을 수 있어요.' : '크루 정보를 불러오지 못했어요.'}
@@ -53,7 +53,7 @@ export function CrewDetailPage() {
   const isOwner = crew.myRole === 'OWNER'
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md pb-12">
+    <div className="page-wide pb-12">
       <PageHeader
         right={
           isOwner && (
@@ -68,7 +68,10 @@ export function CrewDetailPage() {
         }
       />
 
-      <main className="flex flex-col gap-4 px-5">
+      {/* 휴대폰: 한 줄로 (제목 → 오늘 현황·내 기록·초대·크루원 → 피드)
+          넓은 화면(1280px~): 왼쪽에 제목과 피드, 오른쪽에 오늘 현황·내 기록·초대·크루원 */}
+      <main className="flex flex-col gap-4 px-5 lg:mx-auto lg:max-w-2xl lg:px-0 xl:grid xl:max-w-none xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-x-10 xl:gap-y-6 2xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="flex flex-col gap-4 xl:col-start-1">
         {(welcome.created || welcome.joined) && (
           <div className="rounded-2xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700" role="status">
             {welcome.created ? '🎉 크루를 만들었어요! 아래 초대 코드를 친구에게 보내 보세요.' : '🎉 크루에 참여했어요!'}
@@ -81,7 +84,7 @@ export function CrewDetailPage() {
         )}
 
         <section>
-          <h1 className="text-2xl font-bold leading-snug">{crew.name}</h1>
+          <h1 className="text-2xl font-bold leading-snug lg:text-3xl">{crew.name}</h1>
           {crew.description && <p className="mt-2 leading-relaxed text-stone-600">{crew.description}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
             <InfoChip icon={<CalendarDays className="size-3.5" />}>{formatDays(crew.certDays)} 인증</InfoChip>
@@ -91,7 +94,9 @@ export function CrewDetailPage() {
             </InfoChip>
           </div>
         </section>
+        </div>
 
+        <aside className="flex flex-col gap-4 xl:col-start-2 xl:row-span-2 xl:row-start-1" aria-label="오늘 현황과 크루 정보">
         <TodayCard crewId={crew.id} />
 
         <MyStatsCard crewId={crew.id} />
@@ -114,22 +119,34 @@ export function CrewDetailPage() {
             ))}
           </ul>
         </section>
+        <LeaveButton className="hidden xl:inline-flex" onClick={() => setPending({ kind: 'leave' })} />
+        </aside>
 
-        <div className="mt-2">
+        <div className="mt-2 xl:col-start-1 xl:mt-0">
           <FeedSection crewId={crew.id} />
         </div>
 
-        <button
-          onClick={() => setPending({ kind: 'leave' })}
-          className="mx-auto mt-4 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-stone-400 hover:bg-stone-100 hover:text-red-600"
-        >
-          <LogOut className="size-4" aria-hidden />
-          크루 나가기
-        </button>
+        <LeaveButton className="inline-flex xl:hidden" onClick={() => setPending({ kind: 'leave' })} />
       </main>
 
       <CrewActions crew={crew} pending={pending} onClose={() => setPending(null)} />
     </div>
+  )
+}
+
+/** 휴대폰에서는 피드 아래, 데스크톱에서는 오른쪽 칸 맨 아래에 둔다 (className으로 어디서 보일지 정함) */
+function LeaveButton({ className, onClick }: { className: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        'mx-auto mt-4 items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-stone-400 hover:bg-stone-100 hover:text-red-600',
+        className,
+      )}
+    >
+      <LogOut className="size-4" aria-hidden />
+      크루 나가기
+    </button>
   )
 }
 

@@ -26,15 +26,19 @@ export function CertificationCard({ crewId, certification: c }: { crewId: number
       </header>
 
       <Link to={detail} className="block bg-stone-100" aria-label={`${c.author.nickname}님의 인증 사진 크게 보기`}>
-        <img
-          src={c.thumbnailUrl}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          // 사진 비율대로 자리를 미리 잡아 두어, 사진이 늦게 떠도 화면이 덜컹거리지 않게 한다
-          style={{ aspectRatio: `${c.imageWidth} / ${c.imageHeight}` }}
-          className="max-h-[28rem] w-full object-cover"
-        />
+        {/* 휴대폰은 480px 썸네일(데이터 절약), 넓은 화면은 카드가 커서 1600px 사진을 쓴다 (작은 사진을 늘리면 흐려진다) */}
+        <picture>
+          <source media="(min-width: 1280px)" srcSet={c.imageUrl} />
+          <img
+            src={c.thumbnailUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            // 사진 비율대로 자리를 미리 잡아 두어, 사진이 늦게 떠도 화면이 덜컹거리지 않게 한다
+            style={{ aspectRatio: `${c.imageWidth} / ${c.imageHeight}` }}
+            className="max-h-[28rem] w-full object-cover"
+          />
+        </picture>
       </Link>
 
       <div className="px-4 pt-3 pb-4">

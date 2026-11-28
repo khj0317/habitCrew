@@ -5,16 +5,73 @@ import { ApiError } from '../lib/api'
 import { useRedirectTarget } from '../lib/redirect'
 import { useAuth } from '../providers/authContext'
 
+/**
+ * 로그인·회원가입 화면.
+ * 휴대폰: 폼만 한 줄로. 데스크톱: 왼쪽에 서비스 소개, 오른쪽에 폼.
+ */
 function AuthLayout({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 py-10">
-      <Logo className="text-lg text-stone-900" />
-      <div className="mt-12 mb-8">
-        <h1 className="text-2xl font-bold leading-snug">{title}</h1>
-        <p className="mt-2 text-stone-500">{subtitle}</p>
+    <div className="min-h-dvh lg:grid lg:grid-cols-2">
+      <BrandPanel />
+      <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 py-10 lg:justify-center lg:py-16">
+        <Logo className="text-lg text-stone-900 lg:hidden" />
+        <div className="mt-12 mb-8 lg:mt-0">
+          <h1 className="text-2xl font-bold leading-snug lg:text-3xl">{title}</h1>
+          <p className="mt-2 text-stone-500">{subtitle}</p>
+        </div>
+        {children}
+      </main>
+    </div>
+  )
+}
+
+const FEATURES = [
+  { emoji: '📸', title: '사진 한 장으로 인증', text: '인증일마다 오늘 한 일을 사진으로 남겨요' },
+  { emoji: '🔥', title: '연속 기록과 월간 랭킹', text: '달력에 쌓이는 잔디로 꾸준함이 보여요' },
+  { emoji: '💸', title: '빼먹으면 벌금 포인트', text: '매일 자정, 크루 규칙대로 자동 정산돼요' },
+  { emoji: '🔔', title: '마감 2시간 전 알림', text: '밤 10시, 아직 안 했다면 알려 드려요' },
+]
+
+function BrandPanel() {
+  return (
+    <aside className="relative hidden overflow-hidden bg-gradient-to-br from-brand-600 to-brand-700 px-14 py-14 text-white lg:flex lg:flex-col">
+      <div
+        className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-white/5"
+        aria-hidden
+      />
+      <span className="relative inline-flex items-center gap-2 text-xl font-bold">
+        <span className="flex size-9 items-center justify-center rounded-xl bg-white text-brand-600" aria-hidden>
+          ✓
+        </span>
+        HabitCrew
+      </span>
+      <div className="relative my-auto max-w-md">
+        <h2 className="text-4xl leading-tight font-bold">
+          혼자서는 사흘,
+          <br />
+          크루와 함께라면 오래.
+        </h2>
+        <p className="mt-4 text-lg text-white/80">친구들과 매일 인증하며 습관을 만드는 서비스예요.</p>
+        <ul className="mt-10 flex flex-col gap-5">
+          {FEATURES.map((f) => (
+            <li key={f.title} className="flex gap-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-xl" aria-hidden>
+                {f.emoji}
+              </span>
+              <div>
+                <p className="font-semibold">{f.title}</p>
+                <p className="text-sm text-white/75">{f.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-      {children}
-    </main>
+      <p className="relative text-sm text-white/60">포트폴리오 프로젝트 · Spring Boot · React</p>
+    </aside>
   )
 }
 

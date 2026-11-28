@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -9,9 +9,15 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 export async function capture(page: Page, name: string) {
   if (!process.env.SCREENSHOTS) return
   // 개발 서버는 HMR 연결이 계속 열려 있어 networkidle을 기다리면 끝나지 않는다: 사진이 다 뜰 때까지만 기다린다
-  await page.waitForFunction(() => [...document.images].every((img) => img.complete))
+  // 화면 아래쪽의 지연 로딩(loading="lazy") 사진은 스크롤하기 전까지 안 뜨므로, 지금 보이는 사진만 기다린다
+  await page.waitForFunction(() =>
+    [...document.images]
+      .filter((img) => img.getBoundingClientRect().top < window.innerHeight)
+      .every((img) => img.complete),
+  )
   await page.waitForTimeout(300)
-  await page.screenshot({ path: path.join(here, '..', '..', '..', 'docs', 'screenshots', `${name}.png`) })
+  const project = test.info().project.name // mobile / desktop
+  await page.screenshot({ path: path.join(here, '..', '..', '..', 'docs', 'screenshots', `${project}-${name}.png`) })
 }
 
 /** 인증 사진으로 쓸 이미지 (앱 아이콘 PNG를 재사용) */

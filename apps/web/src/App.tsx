@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router'
+import { AppShell } from './components/AppShell'
 import { FullScreenSpinner } from './components/ui'
 import { LoginPage, SignupPage } from './pages/AuthPages'
 import { CertificationPage } from './pages/CertificationPage'
@@ -33,7 +34,11 @@ function GuestOnly({ children }: { children: ReactNode }) {
   return children
 }
 
-const authed = (page: ReactNode) => <RequireAuth>{page}</RequireAuth>
+const authed = (page: ReactNode) => (
+  <RequireAuth>
+    <AppShell>{page}</AppShell>
+  </RequireAuth>
+)
 const guest = (page: ReactNode) => <GuestOnly>{page}</GuestOnly>
 
 export function App() {

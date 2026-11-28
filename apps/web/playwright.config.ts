@@ -21,6 +21,9 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  // 휴대폰 화면 기준으로 만든 앱이라 모바일 크기로 돌린다
-  projects: [{ name: 'mobile-chrome', use: { ...devices['Pixel 7'] } }],
+  // 휴대폰(한 줄 화면)과 데스크톱(사이드바·두 칸 화면) 양쪽에서 같은 흐름을 확인한다
+  projects: [
+    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+  ],
 })

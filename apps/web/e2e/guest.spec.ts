@@ -10,7 +10,8 @@ test('로그인 없이 둘러보기 → 사진 인증 → 좋아요·댓글 → 
   await capture(page, '02-home')
 
   // 2) 체험 크루: 2주치 기록이 채워져 있다
-  await page.getByRole('link', { name: /하루 한 페이지 독서 \(체험\)/ }).click()
+  // 데스크톱은 사이드바에도 같은 크루 링크가 있어서 본문에서 고른다
+  await page.getByRole('main').getByRole('link', { name: /하루 한 페이지 독서 \(체험\)/ }).click()
   await expect(page.getByText('오늘 인증이 남았어요')).toBeVisible()
   await expect(page.getByText('2,000P')).toBeVisible()
   await capture(page, '03-crew')

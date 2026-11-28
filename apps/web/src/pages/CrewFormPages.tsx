@@ -46,7 +46,7 @@ export function CreateCrewPage() {
   }
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md">
+    <div className="page-narrow">
       <PageHeader title="크루 만들기" />
       <form onSubmit={onSubmit} className="flex flex-col gap-6 px-5 pt-2 pb-10" noValidate>
         <Field
@@ -172,10 +172,10 @@ export function EditCrewPage() {
     setMaxMembers(crew.maxMembers)
   }, [crew])
 
-  if (isPending) return <div className="mx-auto min-h-dvh w-full max-w-md"><PageHeader back={`/crews/${id}`} /></div>
+  if (isPending) return <div className="page-narrow"><PageHeader back={`/crews/${id}`} /></div>
   if (isError || crew.myRole !== 'OWNER') {
     return (
-      <div className="mx-auto min-h-dvh w-full max-w-md">
+      <div className="page-narrow">
         <PageHeader back="/" />
         <ErrorState message="크루장만 크루 정보를 바꿀 수 있어요." />
       </div>
@@ -197,7 +197,7 @@ export function EditCrewPage() {
   }
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md">
+    <div className="page-narrow">
       <PageHeader title="크루 정보 수정" back={`/crews/${id}`} />
       <form onSubmit={onSubmit} className="flex flex-col gap-6 px-5 pt-2 pb-10" noValidate>
         <Field

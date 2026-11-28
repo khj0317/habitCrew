@@ -18,12 +18,15 @@ export function SettlementsPage() {
   const [calendarUserId, setCalendarUserId] = useState<number | null>(null)
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md pb-12">
+    <div className="page-wide pb-12">
       <PageHeader title={crew ? `${crew.name} 기록` : '기록'} back={`/crews/${crewId}`} />
-      <main className="flex flex-col gap-6 px-5">
+      {/* 데스크톱: 랭킹|달력, 크루원 기록|정산 내역 두 칸 */}
+      <main className="flex flex-col gap-6 px-5 lg:grid lg:grid-cols-2 lg:items-start lg:px-0">
         {stats && (
           <>
-            <MonthSwitcher month={month} onChange={setMonth} />
+            <div className="lg:col-span-2">
+              <MonthSwitcher month={month} onChange={setMonth} />
+            </div>
             <RankingCard crewId={crewId} month={month} myUserId={stats.me.userId} />
             <CalendarCard
               crewId={crewId}

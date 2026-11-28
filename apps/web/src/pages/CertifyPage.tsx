@@ -52,7 +52,7 @@ export function CertifyPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
+    <div className="page-narrow flex flex-col">
       <PageHeader title={crew ? `${crew.name} 인증` : '인증하기'} back={`/crews/${crewId}`} />
       <main className="flex flex-1 flex-col gap-5 px-5 pb-8">
         <input

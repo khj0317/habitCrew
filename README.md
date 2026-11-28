@@ -4,12 +4,16 @@
 
 ![CI](https://github.com/khj0317/habitCrew/actions/workflows/ci.yml/badge.svg)
 
+<img src="docs/screenshots/desktop-03-crew.png" alt="데스크톱: 사이드바, 인증 피드, 오늘의 인증 현황" />
+
 <p>
-  <img src="docs/screenshots/02-home.png" width="200" alt="홈" />
-  <img src="docs/screenshots/03-crew.png" width="200" alt="크루 화면: 오늘의 인증 현황과 내 기록" />
-  <img src="docs/screenshots/05-feed.png" width="200" alt="인증 피드" />
-  <img src="docs/screenshots/07-records.png" width="200" alt="월간 랭킹과 인증 달력" />
+  <img src="docs/screenshots/mobile-02-home.png" width="200" alt="휴대폰: 홈" />
+  <img src="docs/screenshots/mobile-03-crew.png" width="200" alt="휴대폰: 크루 화면" />
+  <img src="docs/screenshots/mobile-05-feed.png" width="200" alt="휴대폰: 인증 피드" />
+  <img src="docs/screenshots/mobile-07-records.png" width="200" alt="휴대폰: 월간 랭킹과 인증 달력" />
 </p>
+
+데스크톱에서는 사이드바와 두 칸 화면, 휴대폰에서는 한 줄 화면으로 바뀝니다(반응형). 휴대폰 홈 화면에 앱처럼 설치할 수도 있습니다(PWA).
 
 ## 바로 체험하기
 
@@ -69,7 +73,7 @@ flowchart LR
 ## 테스트
 
 - **백엔드 통합 테스트 68개**: 실제 PostgreSQL·Redis·SeaweedFS 컨테이너(Testcontainers)로 API를 끝까지 호출합니다. 시계를 옮겨 자정·요일 경계를 재현하고, 여러 스레드로 동시 요청을 재현합니다.
-- **E2E 테스트 (Playwright)**: 휴대폰 화면 크기의 실제 브라우저로 "둘러보기 → 사진 인증 → 좋아요·댓글 → 기록"과 "가입 → 크루 만들기 → 초대 링크로 참여"를 끝까지 눌러 봅니다. 위 스크린샷도 이 테스트가 찍었습니다.
+- **E2E 테스트 (Playwright)**: 휴대폰(Pixel 7)과 데스크톱(1440px) 두 크기의 실제 브라우저로 "둘러보기 → 사진 인증 → 좋아요·댓글 → 기록"과 "가입 → 크루 만들기 → 초대 링크로 참여"를 끝까지 눌러 봅니다. 위 스크린샷도 이 테스트가 찍었습니다.
 - **성능 측정**: `./gradlew benchmark` (일반 테스트에서는 빠짐)
 
 ```powershell

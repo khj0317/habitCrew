@@ -13,8 +13,8 @@ export function HomePage() {
   const { data: crews, isPending, isError, refetch } = useMyCrews()
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-      <header className="flex items-center justify-between px-5 py-4">
+    <div className="page-wide flex flex-col">
+      <header className="flex items-center justify-between px-5 py-4 lg:hidden">
         <Logo className="text-stone-900" />
         <button
           onClick={logout}
@@ -25,19 +25,19 @@ export function HomePage() {
         </button>
       </header>
 
-      <main className="flex flex-1 flex-col px-5 pb-10">
-        <section className="mt-4">
+      <main className="flex flex-1 flex-col px-5 pb-10 lg:px-0">
+        <section className="mt-4 lg:mt-0">
           <p className="text-stone-500">안녕하세요,</p>
-          <h1 className="text-2xl font-bold">{user?.nickname}님 🙌</h1>
+          <h1 className="text-2xl font-bold lg:text-3xl">{user?.nickname}님 🙌</h1>
         </section>
 
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="mt-6 grid gap-3 lg:grid-cols-2 lg:items-start">
           <GuestBanner />
           <PushCard />
         </div>
 
         {isPending ? (
-          <div className="mt-8 flex flex-col gap-3" aria-label="불러오는 중">
+          <div className="mt-8 grid gap-3 lg:grid-cols-2 xl:grid-cols-3" aria-label="불러오는 중">
             {[0, 1].map((i) => (
               <div key={i} className="h-32 animate-pulse rounded-2xl bg-stone-200/60" />
             ))}
@@ -63,19 +63,22 @@ export function HomePage() {
                 초대 코드 입력
               </Link>
             </div>
-            <ul className="flex flex-col gap-3">
+            {/* 휴대폰은 한 줄, 데스크톱은 2~3칸 카드 */}
+            <ul className="grid gap-3 lg:grid-cols-2 lg:gap-4 xl:grid-cols-3">
               {crews.map((crew) => (
                 <li key={crew.id}>
                   <CrewCard crew={crew} />
                 </li>
               ))}
+              <li>
+                <Link
+                  to="/crews/new"
+                  className="flex h-14 items-center justify-center gap-1.5 rounded-2xl border border-dashed border-stone-300 text-sm font-medium text-stone-500 transition hover:border-brand-500 hover:text-brand-700 lg:h-full lg:min-h-36"
+                >
+                  <Plus className="size-4" aria-hidden />새 크루 만들기
+                </Link>
+              </li>
             </ul>
-            <Link
-              to="/crews/new"
-              className="mt-3 flex h-14 items-center justify-center gap-1.5 rounded-2xl border border-dashed border-stone-300 text-sm font-medium text-stone-500 transition hover:border-brand-500 hover:text-brand-700"
-            >
-              <Plus className="size-4" aria-hidden />새 크루 만들기
-            </Link>
           </>
         )}
       </main>
@@ -87,7 +90,7 @@ function CrewCard({ crew }: { crew: CrewSummary }) {
   return (
     <Link
       to={`/crews/${crew.id}`}
-      className="block rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-brand-500 hover:shadow-sm"
+      className="block h-full rounded-2xl border border-stone-200 bg-white p-5 transition hover:border-brand-500 hover:shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-[17px] font-bold leading-snug">{crew.name}</h3>
@@ -117,7 +120,7 @@ function CrewCard({ crew }: { crew: CrewSummary }) {
 function EmptyCrews() {
   const navigate = useNavigate()
   return (
-    <section className="mt-8 flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
+    <section className="mt-8 flex flex-1 flex-col items-center justify-center rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center lg:flex-none lg:py-20">
       <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-3xl">🌱</div>
       <h2 className="mt-5 text-lg font-semibold">아직 참여한 크루가 없어요</h2>
       <p className="mt-2 text-sm leading-relaxed text-stone-500">
@@ -125,7 +128,7 @@ function EmptyCrews() {
         <br />
         초대 코드로 참여해 보세요.
       </p>
-      <div className="mt-8 flex w-full flex-col gap-2">
+      <div className="mt-8 flex w-full flex-col gap-2 lg:max-w-xs">
         <Button onClick={() => navigate('/crews/new')}>
           <Plus className="size-4" aria-hidden />
           크루 만들기

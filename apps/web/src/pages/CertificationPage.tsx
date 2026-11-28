@@ -30,7 +30,7 @@ export function CertificationPage() {
 
   if (isPending) {
     return (
-      <div className="mx-auto min-h-dvh w-full max-w-md">
+      <div className="page-wide">
         <PageHeader back={`/crews/${crewId}`} />
         <div className="mx-5 aspect-square animate-pulse rounded-3xl bg-stone-200/60" />
       </div>
@@ -38,7 +38,7 @@ export function CertificationPage() {
   }
   if (isError) {
     return (
-      <div className="mx-auto min-h-dvh w-full max-w-md">
+      <div className="page-wide">
         <PageHeader back={`/crews/${crewId}`} />
         <ErrorState message="인증을 찾을 수 없어요. 지워졌을 수 있어요." />
       </div>
@@ -49,7 +49,7 @@ export function CertificationPage() {
   const canDelete = c.mine && today?.date === c.certDate
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-md pb-28">
+    <div className="page-wide pb-28 lg:pb-0">
       <PageHeader
         back={`/crews/${crewId}`}
         title={`${c.author.nickname}님의 인증`}
@@ -66,7 +66,9 @@ export function CertificationPage() {
         }
       />
 
-      <div className="bg-stone-900">
+      {/* 넓은 화면(1280px~): 왼쪽 사진, 오른쪽 내용·댓글 */}
+      <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start xl:gap-8">
+      <div className="bg-stone-900 lg:overflow-hidden lg:rounded-3xl">
         <img
           src={c.imageUrl}
           alt={`${c.author.nickname}님의 인증 사진`}
@@ -75,6 +77,7 @@ export function CertificationPage() {
         />
       </div>
 
+      <div className="lg:rounded-3xl lg:border lg:border-stone-200 lg:bg-white lg:pb-5">
       <section className="px-5 pt-4">
         <div className="flex items-center gap-2.5">
           <Avatar userId={c.author.userId} nickname={c.author.nickname} size="sm" />
@@ -103,6 +106,8 @@ export function CertificationPage() {
       </section>
 
       <Comments crewId={crewId} certificationId={id} count={c.commentCount} />
+      </div>
+      </div>
 
       <ConfirmDialog
         open={confirmDelete}
@@ -187,7 +192,7 @@ function Comments({ crewId, certificationId, count }: { crewId: number; certific
 
       <form
         onSubmit={onSubmit}
-        className="fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-end gap-2 border-t border-stone-200 bg-white px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        className="fixed inset-x-0 bottom-0 z-10 mx-auto flex w-full max-w-md items-end gap-2 border-t border-stone-200 bg-white px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:static lg:mt-5 lg:max-w-none lg:border-0 lg:px-0 lg:pb-0"
       >
         <div className="flex-1">
           {error && (

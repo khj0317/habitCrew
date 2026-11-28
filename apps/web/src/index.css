@@ -19,3 +19,17 @@ body,
 body {
   @apply bg-stone-50 text-stone-900 antialiased;
 }
+
+/*
+ * 화면 폭: 휴대폰에서는 한 줄(최대 28rem), 데스크톱(lg, 1024px~)에서는 사이드바 옆 넓은 영역을 쓴다.
+ * - page-narrow: 입력 화면 (크루 만들기, 인증 올리기 등)
+ * - page-wide: 보는 화면 (홈, 크루, 기록, 인증 상세)
+ */
+@layer components {
+  .page-narrow {
+    @apply mx-auto min-h-dvh w-full max-w-md lg:min-h-0 lg:max-w-xl;
+  }
+  .page-wide {
+    @apply mx-auto min-h-dvh w-full max-w-md lg:min-h-0 lg:max-w-6xl;
+  }
+}
