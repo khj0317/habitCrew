@@ -13,7 +13,8 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   workers: 1,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  // CI: 실패 내용을 GitHub 실행 화면에 주석(annotation)으로 띄운다 (로그는 로그인해야 보이지만 주석은 바로 보인다)
+  reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL,
     locale: 'ko-KR',
