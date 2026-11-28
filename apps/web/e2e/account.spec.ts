@@ -20,7 +20,11 @@ test('닉네임 바꾸기 → 비밀번호 찾기 메일 → 새 비밀번호로
   await page.evaluate(() => fetch('/api/auth/logout', { method: 'POST' }))
   await page.goto('/login')
   await page.getByRole('link', { name: '비밀번호를 잊으셨나요?' }).click()
+  // 화면이 바뀐 뒤에 입력한다 (느린 CI에서는 바뀌기 전 로그인 화면의 이메일 칸에 입력되는 일이 있었다)
+  await expect(page).toHaveURL(/\/forgot-password$/)
+  await expect(page.getByRole('heading', { name: /비밀번호 찾기/ })).toBeVisible()
   await page.getByLabel('이메일').fill(email)
+  await expect(page.getByRole('button', { name: '재설정 링크 보내기' })).toBeEnabled()
   await page.getByRole('button', { name: '재설정 링크 보내기' }).click()
   await expect(page.getByText('메일을 확인해 주세요')).toBeVisible()
 
